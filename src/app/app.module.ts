@@ -20,6 +20,8 @@ import localeEsAr from '@angular/common/locales/es-AR';
 
 registerLocaleData(localeEsAr, 'es-Ar');
 
+import { InterceptorService } from './servicios/interceptor.service';
+
 // Importaciones de componentes ng-zorro
 import { NzCardModule } from 'ng-zorro-antd/card';
 import { NzGridModule } from 'ng-zorro-antd/grid';
@@ -112,7 +114,12 @@ import { ScrollingModule } from '@angular/cdk/scrolling';
   schemas: [CUSTOM_ELEMENTS_SCHEMA, NO_ERRORS_SCHEMA],
   providers: [
     { provide: NZ_I18N, useValue: en_US },
-    { provide: LOCALE_ID, useValue: 'en_US' }
+    { provide: LOCALE_ID, useValue: 'en_US' },
+    {
+      provide: HTTP_INTERCEPTORS,
+      useClass: InterceptorService,
+      multi: true
+    }
   ],
   bootstrap: [AppComponent]
 })
