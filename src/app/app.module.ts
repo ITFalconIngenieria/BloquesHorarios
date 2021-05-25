@@ -3,7 +3,6 @@ import { BrowserModule } from '@angular/platform-browser';
 import { AppRoutingModule } from './app-routing.module';
 import { NgModule, CUSTOM_ELEMENTS_SCHEMA, NO_ERRORS_SCHEMA, LOCALE_ID } from '@angular/core';
 import { AppComponent } from './app.component';
-import { IconsProviderModule } from './icons-provider.module';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { HttpClientModule, HTTP_INTERCEPTORS } from '@angular/common/http';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
@@ -73,9 +72,6 @@ import { ScrollingModule } from '@angular/cdk/scrolling';
     HttpClientModule,
     BrowserAnimationsModule,
     ReactiveFormsModule,
-    /////////////////
-    IconsProviderModule,
-    // NgZorroAntdModule,
     NzTabsModule,
     NzBadgeModule,
     NzCardModule,
