@@ -7,13 +7,14 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { HttpClientModule, HTTP_INTERCEPTORS } from '@angular/common/http';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 
+
 // import { NgZorroAntdModule } from 'ng-zorro-antd';
 import { NZ_I18N } from 'ng-zorro-antd/i18n';
-import { en_US, NZ_DATE_LOCALE } from 'ng-zorro-antd/i18n';
+import { en_US } from 'ng-zorro-antd/i18n';
 
 // config angular i18n
 import { registerLocaleData } from '@angular/common';
-import en from '@angular/common/locales/en';
+
 
 import localeEsAr from '@angular/common/locales/es-AR';
 
@@ -56,6 +57,7 @@ import { NzTabsModule } from 'ng-zorro-antd/tabs';
 import { NzBadgeModule } from 'ng-zorro-antd/badge';
 import { NzSkeletonModule } from 'ng-zorro-antd/skeleton';
 import { ScrollingModule } from '@angular/cdk/scrolling';
+import { BloqueHorarioService } from '@service/bloqueHorario.service';
 
 
 @NgModule({

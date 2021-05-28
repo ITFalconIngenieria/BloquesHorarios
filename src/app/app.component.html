@@ -1,1 +1,53 @@
-<h1>Refactor</h1>
+<div class="container">
+    <div class="row m-2 justify-content-center">
+        <div class="col text-center">
+            <h1 class="text-uppercase fw-bold">Sistema de facturacion Energetica</h1>
+        </div>
+    </div>
+    <div class="row m-2 justify-content-center">
+        <div class="col text-center m-2">
+            <h3 class="text-capitalize">
+                Bloques Horarios
+            </h3>
+        </div>
+        <div class="col text-center m-2">
+            <button nz-button nzType="primary">Nuevo Bloque Horario</button>
+        </div>
+        <div class="col text-center m-2">
+            <nz-input-group [nzPrefix]="prefixTemplateSearch">
+                <input type="text" nz-input placeholder="Buscar" />
+              </nz-input-group>
+              <ng-template #prefixTemplateSearch><i nz-icon nzType="search"></i></ng-template>
+        </div>
+    </div>
+    <div class="row m-2 justify-content-center">
+        <div class="col text-center m-2">
+            <!--[nzData]="testlist"!-->
+            <nz-table #BHTable [nzData]="tableData" nzBordered="true" nzSize="small">
+                <thead>
+                     <tr class="justify-content-center">
+                         <th rowspan="2" class="text-uppercase fw-bold text-secondary text-center">Clase Dia</th>
+                         <th colspan="2" class="text-uppercase fw-bold text-secondary text-center">Periodo de Punta</th>
+                         <th colspan="2" class="text-uppercase fw-bold text-secondary text-center">Periodo Intermedio</th>
+                         <th colspan="2" class="text-uppercase fw-bold text-secondary text-center">Periodo Valle</th>
+                     </tr>
+                     <tr class="justify-content-center">
+                        <th colspan="2" class="text-uppercase fw-bold text-secondary text-center">Horarios</th>
+                        <th colspan="2" class="text-uppercase fw-bold text-secondary text-center">Horarios</th>
+                        <th colspan="2" class="text-uppercase fw-bold text-secondary text-center">Horarios</th>
+                     </tr>
+                </thead>
+                <tbody>
+                    
+                </tbody>
+            </nz-table>
+        
+        </div>
+    </div>
+    <div class="row m-2 justify-content-center">
+        <div class="col m-2">
+            <label for="Observacion" class="fw-bold">Observaciones</label>
+            <textarea nz-input rows="4" cols="20"></textarea>
+        </div>
+    </div>
+</div>
