@@ -19,5 +19,9 @@ export class AppComponent implements OnInit{
     .getBloqueHorario()
     .subscribe((data:any)=> this.tableData = data);
   }
+
+  mostrarFormulario(){
+    
+  }
 }
 

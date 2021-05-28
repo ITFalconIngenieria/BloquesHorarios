@@ -57,7 +57,7 @@ import { NzTabsModule } from 'ng-zorro-antd/tabs';
 import { NzBadgeModule } from 'ng-zorro-antd/badge';
 import { NzSkeletonModule } from 'ng-zorro-antd/skeleton';
 import { ScrollingModule } from '@angular/cdk/scrolling';
-import { BloqueHorarioService } from '@service/bloqueHorario.service';
+import { NzTypographyModule } from 'ng-zorro-antd/typography';
 
 
 @NgModule({
@@ -65,6 +65,7 @@ import { BloqueHorarioService } from '@service/bloqueHorario.service';
     AppComponent
   ],
   imports: [
+    NzTypographyModule,
     ScrollingModule,
     BrowserModule,
     AppRoutingModule,

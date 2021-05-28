@@ -1,53 +1,52 @@
-<div class="container">
-    <div class="row m-2 justify-content-center">
-        <div class="col text-center">
-            <h1 class="text-uppercase fw-bold">Sistema de facturacion Energetica</h1>
+<nz-layout>
+    <nz-header class="header">
+        <h1 nz-typography>Sistema de Facturacion Energetica</h1>
+    </nz-header>
+    <nz-content class="content">
+        <div nz-row class="rows-content" style="text-align: center;" >
+            <div nz-col [nzSpan]="6">
+                <h3 nz-typography style="text-align: center;">Bloques Horarios</h3>
+            </div>
+            <div nz-col [nzSpan]="6">
+                <button nz-button nzType="primary" nzShape="round">Nuevo Bloque Horario</button>
+            </div>
+            <div nz-col [nzSpan]="6">
+                <nz-input-group [nzPrefix]="prefixTemplateIcon">
+                    <input nz-input type="text" placeholder="Buscar">
+                </nz-input-group>
+                <ng-template #prefixTemplateIcon>
+                    <i nz-icon nzType="search"></i>
+                </ng-template>
+            </div>
         </div>
-    </div>
-    <div class="row m-2 justify-content-center">
-        <div class="col text-center m-2">
-            <h3 class="text-capitalize">
-                Bloques Horarios
-            </h3>
+        <div nz-row>
+            <div nz-col [nzSpan]="20">
+                <nz-table #BloqueHorarioTable>
+                    <thead>
+                        <tr>
+                            <th rowspan="2">Clase Dia</th>
+                            <th colspan="2">Periodo de Punta</th>
+                            <th colspan="2">Periodo de Intermdio</th>
+                            <th colspan="2">Periodo de Valle</th>
+                        </tr>
+                        <tr>
+                            <th colspan="2">Horarios</th>
+                            <th colspan="2">Horarios</th>
+                            <th colspan="2">Horarios</th>
+                        </tr>
+                    </thead>
+                </nz-table>
+            </div>
         </div>
-        <div class="col text-center m-2">
-            <button nz-button nzType="primary">Nuevo Bloque Horario</button>
+        <div nz-row>
+            <div nz-col>
+                <label>Observaciones</label>
+            </div>
         </div>
-        <div class="col text-center m-2">
-            <nz-input-group [nzPrefix]="prefixTemplateSearch">
-                <input type="text" nz-input placeholder="Buscar" />
-              </nz-input-group>
-              <ng-template #prefixTemplateSearch><i nz-icon nzType="search"></i></ng-template>
+        <div nz-row>
+            <div nz-col [nzSpan]="20">
+                <textarea rows="4" nz-input></textarea>
+            </div>
         </div>
-    </div>
-    <div class="row m-2 justify-content-center">
-        <div class="col text-center m-2">
-            <!--[nzData]="testlist"!-->
-            <nz-table #BHTable [nzData]="tableData" nzBordered="true" nzSize="small">
-                <thead>
-                     <tr class="justify-content-center">
-                         <th rowspan="2" class="text-uppercase fw-bold text-secondary text-center">Clase Dia</th>
-                         <th colspan="2" class="text-uppercase fw-bold text-secondary text-center">Periodo de Punta</th>
-                         <th colspan="2" class="text-uppercase fw-bold text-secondary text-center">Periodo Intermedio</th>
-                         <th colspan="2" class="text-uppercase fw-bold text-secondary text-center">Periodo Valle</th>
-                     </tr>
-                     <tr class="justify-content-center">
-                        <th colspan="2" class="text-uppercase fw-bold text-secondary text-center">Horarios</th>
-                        <th colspan="2" class="text-uppercase fw-bold text-secondary text-center">Horarios</th>
-                        <th colspan="2" class="text-uppercase fw-bold text-secondary text-center">Horarios</th>
-                     </tr>
-                </thead>
-                <tbody>
-                    
-                </tbody>
-            </nz-table>
-        
-        </div>
-    </div>
-    <div class="row m-2 justify-content-center">
-        <div class="col m-2">
-            <label for="Observacion" class="fw-bold">Observaciones</label>
-            <textarea nz-input rows="4" cols="20"></textarea>
-        </div>
-    </div>
-</div>
+    </nz-content>
+</nz-layout>

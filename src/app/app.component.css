@@ -7,3 +7,21 @@ input {
     color: black;
     font-weight: 500;
 }
+
+.header{
+    background-color: white;
+    justify-content: center;
+    align-items: center;
+}
+
+h1{
+    text-align: center;
+}
+
+.content{
+    margin: 10px;
+}
+
+nz-layout{
+    background-color: white;
+}

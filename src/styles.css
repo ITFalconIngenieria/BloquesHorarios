@@ -1,8 +1,15 @@
 /* You can add global styles to this file, and also import other style files */
-
 @import "~ng-zorro-antd/ng-zorro-antd.min.css";
 @import "~ng-zorro-antd/style/index.min.css";
 
-/* Import basic styles */
+:root .ant-table-thead > tr > th{
+    text-align: center;
+    font-weight: 700;
 
-@import "~ng-zorro-antd/button/style/index.min.css";
+}
+
+:root .ant-row{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
