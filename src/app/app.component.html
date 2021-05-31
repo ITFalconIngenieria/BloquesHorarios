@@ -21,7 +21,7 @@
         </div>
         <div nz-row>
             <div nz-col [nzSpan]="20">
-                <nz-table #BloqueHorarioTable>
+                <nz-table #BloqueHorarioTable [nzData]="Data" nzBordered>
                     <thead>
                         <tr>
                             <th rowspan="2">Clase Dia</th>
@@ -35,6 +35,14 @@
                             <th colspan="2">Horarios</th>
                         </tr>
                     </thead>
+                    <tbody>
+                        <tr *ngFor="let data of BloqueHorarioTable.data" (click)="mostrarObservacion(data[0])">
+                            <td>{{data[0].claseDia.nombre}}</td>
+                            <td colspan="2"><a [nzValue]="data[0].id" (click)="imprimir($event)">Ver Horario</a></td>
+                            <td colspan="2"><a [nzValue]="data[1].id" (click)="imprimir($event)">Ver Horario</a></td>
+                            <td colspan="2"><a [nzValue]="data[2].id" (click)="imprimir($event)">Ver Horario</a></td>
+                        </tr>
+                    </tbody>
                 </nz-table>
             </div>
         </div>
@@ -45,7 +53,7 @@
         </div>
         <div nz-row>
             <div nz-col [nzSpan]="20">
-                <textarea rows="4" nz-input></textarea>
+                <textarea nz-input [formControl]="observacion">{{observacion.value}}</textarea>
             </div>
         </div>
     </nz-content>

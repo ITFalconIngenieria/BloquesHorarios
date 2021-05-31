@@ -58,13 +58,14 @@ import { NzBadgeModule } from 'ng-zorro-antd/badge';
 import { NzSkeletonModule } from 'ng-zorro-antd/skeleton';
 import { ScrollingModule } from '@angular/cdk/scrolling';
 import { NzTypographyModule } from 'ng-zorro-antd/typography';
-
+import { SweetAlert2Module } from '@sweetalert2/ngx-sweetalert2';
 
 @NgModule({
   declarations: [
     AppComponent
   ],
   imports: [
+    SweetAlert2Module.forRoot(),
     NzTypographyModule,
     ScrollingModule,
     BrowserModule,
