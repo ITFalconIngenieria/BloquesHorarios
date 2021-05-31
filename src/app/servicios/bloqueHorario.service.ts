@@ -120,8 +120,8 @@ export class BloqueHorarioService {
   }
 
   // Horario
-  getHorario() {
-    return this.http.get<any[]>(`${apiUrl}horarios`);
+  getHorario(id) {
+    return this.http.get<any[]>(`${apiUrl}horarios?filter={"where":{"bloqueHorarioId":"${id}"}}`);
   }
 
   postHorario(horario) {

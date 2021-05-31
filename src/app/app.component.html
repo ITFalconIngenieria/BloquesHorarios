@@ -38,9 +38,9 @@
                     <tbody>
                         <tr *ngFor="let data of BloqueHorarioTable.data" (click)="mostrarObservacion(data[0])">
                             <td>{{data[0].claseDia.nombre}}</td>
-                            <td colspan="2"><a [nzValue]="data[0].id" (click)="imprimir($event)">Ver Horario</a></td>
-                            <td colspan="2"><a [nzValue]="data[1].id" (click)="imprimir($event)">Ver Horario</a></td>
-                            <td colspan="2"><a [nzValue]="data[2].id" (click)="imprimir($event)">Ver Horario</a></td>
+                            <td colspan="2"><a [value]="data[0].id" (click)="obtenerHorarios($event)">Ver Horario</a></td>
+                            <td colspan="2"><a [value]="data[1].id" (click)="obtenerHorarios($event)">Ver Horario</a></td>
+                            <td colspan="2"><a [value]="data[2].id" (click)="obtenerHorarios($event)">Ver Horario</a></td>
                         </tr>
                     </tbody>
                 </nz-table>
@@ -56,5 +56,24 @@
                 <textarea nz-input [formControl]="observacion">{{observacion.value}}</textarea>
             </div>
         </div>
+        <nz-modal 
+        [(nzVisible)]="visibleHorarios" 
+        [nzTitle]="null" 
+        [nzContent]="HorarioContent"
+        [nzFooter]="null" 
+        (nzOnCancel)="handleCloseHorarios()"
+        >
+            <ng-template #HorarioContent>
+                <nz-statistic [nzValue]="totalHoras" [nzTitle]="'Total de Horas'"></nz-statistic>
+                <nz-list>
+                    <div>
+                        <h4>Horarios</h4>
+                        <div *ngFor="let data of HorariosView">
+                            <h5>{{data}}</h5>                       
+                        </div>
+                    </div>
+                </nz-list>
+            </ng-template>
+        </nz-modal>
     </nz-content>
 </nz-layout>

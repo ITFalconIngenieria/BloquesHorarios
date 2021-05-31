@@ -4,6 +4,7 @@ import {BloqueHorarioService} from '@service/bloqueHorario.service';
 import * as _ from 'lodash';
 
 import { FormControl } from '@angular/forms';
+import { HorarioModel } from '@model/horario-model';
 moment.locale('es');
 
 @Component({
@@ -15,6 +16,10 @@ export class AppComponent implements OnInit{
   constructor(private BloqueHorarioService: BloqueHorarioService){}
   //Variables--------------
   Data: any[];
+  HorariosData: HorarioModel[];
+  visibleHorarios:Boolean = false;
+  totalHoras: number = 0;
+  HorariosView: String[] = [];
   //-----------------------
   
   //FormControls-----------
@@ -42,14 +47,37 @@ export class AppComponent implements OnInit{
     
   }
 
-  mostrarObservacion(data){
+  mostrarObservacion(data): void {
     //console.log(data.descripcion);
     this.observacion.setValue(data.descripcion);
   }
 
-  imprimir(event){
-    console.log(event.target.nzValue);
+  obtenerHorarios(event): void {
+    this.BloqueHorarioService
+    .getHorario(event.target.value)
+    .toPromise()
+    .then((data: any[]) =>{
+      this.HorariosData = data;
+      
+      this.HorariosData.forEach(element =>{
+        this.totalHoras+= moment(element.horaFinal).diff(moment(element.horaInicio),'hours');
+        this.HorariosView.push(moment(element.horaInicio).format('HH') + ' a ' + moment(element.horaFinal).format('HH'));
+      })
+
+
+      console.log(`Horas Totales: ${this.totalHoras}`);
+      
+      this.visibleHorarios = true;
+    })
   }
   //-------------------------------------
+
+  //Modal Handle Functions
+  handleCloseHorarios(){
+    this.visibleHorarios = false;
+    this.HorariosData = [];
+    this.HorariosView = [];
+    this.totalHoras = 0;
+  }
 }
 
