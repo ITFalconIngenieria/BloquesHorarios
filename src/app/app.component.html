@@ -1,79 +1,133 @@
-<nz-layout>
-    <nz-header class="header">
-        <h1 nz-typography>Sistema de Facturacion Energetica</h1>
-    </nz-header>
-    <nz-content class="content">
-        <div nz-row class="rows-content" style="text-align: center;" >
-            <div nz-col [nzSpan]="6">
-                <h3 nz-typography style="text-align: center;">Bloques Horarios</h3>
-            </div>
-            <div nz-col [nzSpan]="6">
-                <button nz-button nzType="primary" nzShape="round">Nuevo Bloque Horario</button>
-            </div>
-            <div nz-col [nzSpan]="6">
-                <nz-input-group [nzPrefix]="prefixTemplateIcon">
-                    <input nz-input type="text" placeholder="Buscar">
-                </nz-input-group>
-                <ng-template #prefixTemplateIcon>
-                    <i nz-icon nzType="search"></i>
-                </ng-template>
-            </div>
+
+<div nz-row>
+    <div nz-col [nzSpan]="24" class="min-margin">
+        <h1 nz-typography class="center-in-col no-margin">Sistema de Facturacion Energetica</h1>
+    </div>
+</div>
+    <div nz-row class="min-margin">
+        <div nz-col [nzSpan]="6">
+            <h3 nz-typography class="no-margin center-in-col">Bloques Horarios</h3>
         </div>
-        <div nz-row>
-            <div nz-col [nzSpan]="20">
-                <nz-table #BloqueHorarioTable [nzData]="Data" nzBordered>
-                    <thead>
-                        <tr>
-                            <th rowspan="2">Clase Dia</th>
-                            <th colspan="2">Periodo de Punta</th>
-                            <th colspan="2">Periodo de Intermdio</th>
-                            <th colspan="2">Periodo de Valle</th>
-                        </tr>
-                        <tr>
-                            <th colspan="2">Horarios</th>
-                            <th colspan="2">Horarios</th>
-                            <th colspan="2">Horarios</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr *ngFor="let data of BloqueHorarioTable.data" (click)="mostrarObservacion(data[0])">
-                            <td>{{data[0].claseDia.nombre}}</td>
-                            <td colspan="2"><a [value]="data[0].id" (click)="obtenerHorarios($event)">Ver Horario</a></td>
-                            <td colspan="2"><a [value]="data[1].id" (click)="obtenerHorarios($event)">Ver Horario</a></td>
-                            <td colspan="2"><a [value]="data[2].id" (click)="obtenerHorarios($event)">Ver Horario</a></td>
-                        </tr>
-                    </tbody>
-                </nz-table>
-            </div>
+        <div nz-col [nzSpan]="6" class="center-in-col">
+            <button nz-button nzType="primary" (click)="mostrarFormularioMatrizHoraria()">Nuevo Bloque Horario</button>
         </div>
-        <div nz-row>
-            <div nz-col>
-                <label>Observaciones</label>
-            </div>
-        </div>
-        <div nz-row>
-            <div nz-col [nzSpan]="20">
-                <textarea nz-input [formControl]="observacion">{{observacion.value}}</textarea>
-            </div>
-        </div>
-        <nz-modal 
-        [(nzVisible)]="visibleHorarios" 
-        [nzTitle]="null" 
-        [nzContent]="HorarioContent"
-        [nzFooter]="null" 
-        (nzOnCancel)="handleCloseHorarios()"
-        >
-            <ng-template #HorarioContent>
-                <nz-statistic [nzValue]="totalHoras" [nzTitle]="'Total de Horas'"></nz-statistic>
-                <nz-list>
-                    <div>
-                        <h4>Horarios</h4>
-                        <div *ngFor="let data of HorariosView">
-                            <h5>{{data}}</h5>                       
-                        </div>
-                    </div>
-                </nz-list>
+        <div nz-col [nzSpan]="6">
+            <nz-input-group [nzPrefix]="prefixTemplateIcon">
+                <input nz-input type="text" placeholder="Buscar">
+            </nz-input-group>
+            <ng-template #prefixTemplateIcon>
+                <i nz-icon nzType="search"></i>
             </ng-template>
-        </nz-modal>
-    </nz-content>
-</nz-layout>
+        </div>
+        <div nz-col [nzSpan]="6" class="center-in-col">
+            <nz-select [(ngModel)]="MatrizHorariaKeys">
+              <nz-option *ngFor="let matriz of MatrizHorariaData" [nzValue]="matriz.id" [nzLabel]="matriz.codigo"></nz-option>
+            </nz-select>
+        </div>
+    </div>
+<div nz-row nzType="flex" nzJustify="center" nzAlign="middle" class="min-margin">
+    <div nz-col [nzSpan]="18">
+        <nz-table #BloqueHorarioTable [nzData]="BloqueHorarioData" nzBordered>
+            <thead class="bold-text">
+                <tr>
+                    <th rowspan="2" [nzAlign]="'center'">Clase Dia</th>
+                    <th colspan="2" [nzAlign]="'center'">Periodo de Punta</th>
+                    <th colspan="2" [nzAlign]="'center'">Periodo de Intermdio</th>
+                    <th colspan="2" [nzAlign]="'center'">Periodo de Valle</th>
+                </tr>
+                <tr>
+                    <th colspan="2" [nzAlign]="'center'">Horarios</th>
+                    <th colspan="2" [nzAlign]="'center'">Horarios</th>
+                    <th colspan="2" [nzAlign]="'center'">Horarios</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr *ngFor="let data of BloqueHorarioTable.data" (click)="mostrarObservacion(data[0])">
+                    <td [nzAlign]="'center'">{{data[0].claseDia.nombre}}</td>
+                    <td colspan="2" [nzAlign]="'center'"><a [value]="data[0].id" (click)="obtenerHorarios($event)">Ver Horario</a></td>
+                    <td colspan="2" [nzAlign]="'center'"><a [value]="data[1].id" (click)="obtenerHorarios($event)">Ver Horario</a></td>
+                    <td colspan="2" [nzAlign]="'center'"><a [value]="data[2].id" (click)="obtenerHorarios($event)">Ver Horario</a></td>
+                </tr>
+            </tbody>
+        </nz-table>
+    </div>
+</div>
+<div nz-row nzType="flex" nzJustify="center" nzAlign="middle" class="min-margin">
+    <div nz-col>
+        <label>Observaciones</label>
+    </div>
+</div>
+<div nz-row nzType="flex" nzJustify="center" nzAlign="middle" class="min-margin">
+    <div nz-col [nzSpan]="16">
+        <textarea nz-input [formControl]="observacion">{{observacion.value}}</textarea>
+    </div>
+</div>
+<nz-modal 
+[(nzVisible)]="visibleHorarios" 
+[nzTitle]="null" 
+[nzContent]="HorarioContent"
+[nzFooter]="null" 
+(nzOnCancel)="handleCloseHorarios()"
+>
+<ng-template #HorarioContent>
+    <nz-statistic [nzValue]="totalHoras" [nzTitle]="'Total de Horas'"></nz-statistic>
+    <nz-list>
+        <div>
+            <h4>Horarios</h4>
+            <div *ngFor="let data of HorariosView">
+                <h5>{{data}}</h5>                       
+            </div>
+        </div>
+    </nz-list>
+</ng-template>
+</nz-modal>
+<nz-drawer
+    [nzBodyStyle]="{ height: 'calc(100% - 55px)', overflow: 'auto', 'padding-bottom': '53px' }"
+    [nzMaskClosable]="false"
+    [nzWidth]="720"
+    [nzVisible]="visibleMatrizHorariaForm"
+    nzTitle="Nueva Matriz Horaria"
+    (nzOnClose)="handleCloseMatrizHorariaForm()"
+>
+<form nz-form [formGroup]="matrizHorariaForm">
+    <div nz-row nzGutter="8">
+      <div nz-col nzSpan="12">
+        <nz-form-item>
+          <nz-form-label>Codigo</nz-form-label>
+          <nz-form-control>
+            <input nz-input placeholder="Ingrese Codigo de la Matriz" formControlName="Codigo"/>
+          </nz-form-control>
+        </nz-form-item>
+      </div>
+      <div nz-col nzSpan="24">
+        <nz-form-item>
+          <nz-form-label>Descripcion</nz-form-label>
+          <nz-form-control>
+            <nz-input-group>
+              <input type="text" nz-input placeholder="De una Descripcion" formControlName="Descripcion"/>
+            </nz-input-group>
+          </nz-form-control>
+        </nz-form-item>
+      </div>
+    </div>
+    <div nz-row nzGutter="8">
+      <div nz-col nzSpan="24">
+        <nz-form-item>
+          <nz-form-label>Observacion</nz-form-label>
+          <nz-form-control>
+            <textarea
+              nz-input
+              placeholder="Escriba alguna Observacion"
+              [nzAutosize]="{ minRows: 4, maxRows: 4 }"
+              formControlName="Observacion"
+            ></textarea>
+          </nz-form-control>
+        </nz-form-item>
+      </div>
+    </div>
+  </form>
+  <div class="footer">
+    <button type="button" (click)="handleCloseMatrizHorariaForm()" class="ant-btn ant-btn-danger" style="margin-right: 8px;"><span>Cancel</span></button>
+    <button type="button" (click)="handleOkMatrizHorariaForm()" class="ant-btn ant-btn-primary"><span>Submit</span></button>
+  </div>
+</nz-drawer>

@@ -1,7 +1,6 @@
-export interface MatrizHorariaModel{
-    id: Number,
+export interface MatrizHorariaTransferObject{
     codigo: String,
-    fechaCreacion: Date,
+    fechaCreacion: String,
     descripcion: String,
     observacion: String,
     estado: Boolean

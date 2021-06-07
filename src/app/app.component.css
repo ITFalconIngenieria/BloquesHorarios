@@ -1,27 +1,23 @@
-i {
-    color: black;
-    font-weight: 700;
-}
-
-input {
-    color: black;
-    font-weight: 500;
-}
-
-.header{
-    background-color: white;
-    justify-content: center;
-    align-items: center;
-}
-
-h1{
+.center-in-col{
     text-align: center;
 }
 
-.content{
-    margin: 10px;
+.no-margin{
+    margin: 0;
 }
 
-nz-layout{
-    background-color: white;
+.min-margin{
+    margin: 12px;
 }
+
+.footer {
+    position: absolute;
+    bottom: 0px;
+    width: 100%;
+    border-top: 1px solid rgb(232, 232, 232);
+    padding: 10px 16px;
+    text-align: right;
+    left: 0px;
+    background: #fff;
+}
+

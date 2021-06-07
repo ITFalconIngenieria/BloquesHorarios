@@ -1,6 +1,13 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '@env/environment';
+import { PeriodoModel } from '@model/periodo-model';
+import { ClaseDiaModel } from '@model/clase-dia-model';
+import { DiaSemanaModel } from '@model/dia-semana-model';
+import { FeriadosModel } from '@model/feriados-model';
+import { HorarioModel } from '@model/horario-model';
+import { BloqueHorarioModel } from '@model/bloque-horario-model';
+import { MatrizHorariaModel } from '@model/matriz-horaria-model';
 
 const apiUrl = environment.apiUrl;
 
@@ -19,121 +26,121 @@ export class BloqueHorarioService {
 
   // Matriz horaria
   getMatrizHoraria() {
-    return this.http.get<any[]>(`${apiUrl}matriz-horarias`);
+    return this.http.get<MatrizHorariaModel[]>(`${apiUrl}matriz-horarias`);
   }
 
   postMatrizHoraria(matriz) {
-    return this.http.post<any[]>(`${apiUrl}matriz-horarias`, matriz);
+    return this.http.post<MatrizHorariaModel>(`${apiUrl}matriz-horarias`, matriz);
   }
 
   putMatrizHoraria(id, matriz) {
-    return this.http.put<any[]>(`${apiUrl}matriz-horarias/${id}`, matriz);
+    return this.http.put<MatrizHorariaModel[]>(`${apiUrl}matriz-horarias/${id}`, matriz);
   }
 
   deleteMatrizHoraria(id, matriz) {
-    return this.http.patch<any[]>(`${apiUrl}matriz-horarias/${id}`, matriz);
+    return this.http.patch<MatrizHorariaModel[]>(`${apiUrl}matriz-horarias/${id}`, matriz);
   }
 
   // Bloque horario
-  getBloqueHorario() {
-    return this.http.get<any[]>(`${apiUrl}bloque-horarios?filter={"include":[{"relation":"matrizHoraria"},{"relation":"claseDia"},{"relation":"periodo"}]}`);
+  getBloqueHorario(id) {
+    return this.http.get<BloqueHorarioModel[]>(`${apiUrl}bloque-horarios?filter={"where":{"matrizHorariaId":"${id}"},"include":[{"relation":"matrizHoraria"},{"relation":"claseDia"},{"relation":"periodo"}]}`);
   }
 
   postBloqueHorario(bloque) {
-    return this.http.post<any[]>(`${apiUrl}bloque-horarios`, bloque);
+    return this.http.post<BloqueHorarioModel>(`${apiUrl}bloque-horarios`, bloque);
   }
 
   putBloqueHorario(id, bloque) {
-    return this.http.put<any[]>(`${apiUrl}bloque-horarios/${id}`, bloque);
+    return this.http.put<BloqueHorarioModel[]>(`${apiUrl}bloque-horarios/${id}`, bloque);
   }
 
   deleteBloqueHorario(id, bloque) {
-    return this.http.patch<any[]>(`${apiUrl}bloque-horarios/${id}`, bloque);
+    return this.http.patch<BloqueHorarioModel[]>(`${apiUrl}bloque-horarios/${id}`, bloque);
   }
 
   // Periodo
   getPeriodo() {
-    return this.http.get<any[]>(`${apiUrl}periodos`);
+    return this.http.get<PeriodoModel[]>(`${apiUrl}periodos`);
   }
 
   postPeriodo(periodo) {
-    return this.http.post<any[]>(`${apiUrl}periodos`, periodo);
+    return this.http.post<PeriodoModel>(`${apiUrl}periodos`, periodo);
   }
 
   putPeriodo(id, periodo) {
-    return this.http.put<any[]>(`${apiUrl}periodos/${id}`, periodo);
+    return this.http.put<PeriodoModel[]>(`${apiUrl}periodos/${id}`, periodo);
   }
 
   deletePeriodo(id, periodo) {
-    return this.http.patch<any[]>(`${apiUrl}periodos/${id}`, periodo);
+    return this.http.patch<PeriodoModel[]>(`${apiUrl}periodos/${id}`, periodo);
   }
 
   // Clase de dia 
   getClaseDia() {
-    return this.http.get<any[]>(`${apiUrl}clase-dias?filter={"where":{"estado":"true"}}`);
+    return this.http.get<ClaseDiaModel[]>(`${apiUrl}clase-dias?filter={"where":{"estado":"true"}}`);
   }
 
   postClaseDia(claseDia) {
-    return this.http.post<any[]>(`${apiUrl}clase-dias`, claseDia);
+    return this.http.post<ClaseDiaModel>(`${apiUrl}clase-dias`, claseDia);
   }
 
   putClaseDia(id, claseDia) {
-    return this.http.put<any[]>(`${apiUrl}clase-dias/${id}`, claseDia);
+    return this.http.put<ClaseDiaModel[]>(`${apiUrl}clase-dias/${id}`, claseDia);
   }
 
   deleteClaseDia(id, claseDia) {
-    return this.http.patch<any[]>(`${apiUrl}clase-dias/${id}`, claseDia);
+    return this.http.patch<ClaseDiaModel[]>(`${apiUrl}clase-dias/${id}`, claseDia);
   }
 
   // Clase de dia --- Dia Semana
   getDiaSemana() {
-    return this.http.get<any[]>(`${apiUrl}dias-semanas`);
+    return this.http.get<DiaSemanaModel[]>(`${apiUrl}dias-semanas`);
   }
 
   postDiaSemana(diaSemana) {
-    return this.http.post<any[]>(`${apiUrl}dias-semanas`, diaSemana);
+    return this.http.post<DiaSemanaModel>(`${apiUrl}dias-semanas`, diaSemana);
   }
 
   putDiaSemana(id, diaSemana) {
-    return this.http.put<any[]>(`${apiUrl}dias-semanas/${id}`, diaSemana);
+    return this.http.put<DiaSemanaModel[]>(`${apiUrl}dias-semanas/${id}`, diaSemana);
   }
 
   deleteDiaSemana(id, diaSemana) {
-    return this.http.patch<any[]>(`${apiUrl}dias-semanas/${id}`, diaSemana);
+    return this.http.patch<DiaSemanaModel[]>(`${apiUrl}dias-semanas/${id}`, diaSemana);
   }
 
   // Clase de dia --- Feriados
   getFeriados() {
-    return this.http.get<any[]>(`${apiUrl}feriados`);
+    return this.http.get<FeriadosModel[]>(`${apiUrl}feriados`);
   }
 
   postFeriados(feriado) {
-    return this.http.post<any[]>(`${apiUrl}feriados`, feriado);
+    return this.http.post<FeriadosModel>(`${apiUrl}feriados`, feriado);
   }
 
   putFeriados(id, feriado) {
-    return this.http.put<any[]>(`${apiUrl}feriados/${id}`, feriado);
+    return this.http.put<FeriadosModel[]>(`${apiUrl}feriados/${id}`, feriado);
   }
 
   deleteFeriados(id, feriado) {
-    return this.http.patch<any[]>(`${apiUrl}feriados/${id}`, feriado);
+    return this.http.patch<FeriadosModel[]>(`${apiUrl}feriados/${id}`, feriado);
   }
 
   // Horario
   getHorario(id) {
-    return this.http.get<any[]>(`${apiUrl}horarios?filter={"where":{"bloqueHorarioId":"${id}"}}`);
+    return this.http.get<HorarioModel[]>(`${apiUrl}horarios?filter={"where":{"bloqueHorarioId":"${id}"}}`);
   }
 
   postHorario(horario) {
-    return this.http.post<any[]>(`${apiUrl}horarios`, horario);
+    return this.http.post<HorarioModel>(`${apiUrl}horarios`, horario);
   }
 
   putHorario(id, horario) {
-    return this.http.put<any[]>(`${apiUrl}horarios/${id}`, horario);
+    return this.http.put<HorarioModel[]>(`${apiUrl}horarios/${id}`, horario);
   }
 
   deleteHorario(id, horario) {
-    return this.http.patch<any[]>(`${apiUrl}horarios/${id}`, horario);
+    return this.http.patch<HorarioModel[]>(`${apiUrl}horarios/${id}`, horario);
   }
 
 }
