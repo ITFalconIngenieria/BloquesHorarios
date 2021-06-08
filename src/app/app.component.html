@@ -20,14 +20,20 @@
             </ng-template>
         </div>
         <div nz-col [nzSpan]="6" class="center-in-col">
-            <nz-select [(ngModel)]="MatrizHorariaKeys">
+            <nz-select [(ngModel)]="MatrizHorariaKey" [nzDisabled]="loadingSelectData" [nzLoading]="loadingSelectData" (ngModelChange)="handleChangeMatrizHorariaSelect()">
               <nz-option *ngFor="let matriz of MatrizHorariaData" [nzValue]="matriz.id" [nzLabel]="matriz.codigo"></nz-option>
             </nz-select>
         </div>
     </div>
+<br>
+<form nz-form>
+  <nz-form-item>
+
+  </nz-form-item>
+</form>
 <div nz-row nzType="flex" nzJustify="center" nzAlign="middle" class="min-margin">
     <div nz-col [nzSpan]="18">
-        <nz-table #BloqueHorarioTable [nzData]="BloqueHorarioData" nzBordered>
+        <nz-table #BloqueHorarioTable [nzData]="BloqueHorarioData" nzBordered [nzLoading]="loadingTableData">
             <thead class="bold-text">
                 <tr>
                     <th rowspan="2" [nzAlign]="'center'">Clase Dia</th>
@@ -44,9 +50,9 @@
             <tbody>
                 <tr *ngFor="let data of BloqueHorarioTable.data" (click)="mostrarObservacion(data[0])">
                     <td [nzAlign]="'center'">{{data[0].claseDia.nombre}}</td>
-                    <td colspan="2" [nzAlign]="'center'"><a [value]="data[0].id" (click)="obtenerHorarios($event)">Ver Horario</a></td>
-                    <td colspan="2" [nzAlign]="'center'"><a [value]="data[1].id" (click)="obtenerHorarios($event)">Ver Horario</a></td>
-                    <td colspan="2" [nzAlign]="'center'"><a [value]="data[2].id" (click)="obtenerHorarios($event)">Ver Horario</a></td>
+                    <td colspan="2" [nzAlign]="'center'" (click)="printID(data[0].id)"><a [value]="data[0].id" (click)="obtenerHorarios($event)">Ver Horario</a></td>
+                    <td colspan="2" [nzAlign]="'center'" (click)="printID(data[1].id)"><a [value]="data[1].id" (click)="obtenerHorarios($event)">Ver Horario</a></td>
+                    <td colspan="2" [nzAlign]="'center'" (click)="printID(data[2].id)"><a [value]="data[2].id" (click)="obtenerHorarios($event)">Ver Horario</a></td>
                 </tr>
             </tbody>
         </nz-table>
