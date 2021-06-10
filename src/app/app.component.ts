@@ -12,6 +12,7 @@ import { ClaseDiaModel } from '@model/clase-dia-model';
 import { BloqueHorarioTransferObject } from './DataTransfer/bloque-horario-transfer-object';
 import { PeriodoModel } from '@model/periodo-model';
 import { BloqueHorarioModel } from '@model/bloque-horario-model';
+import { TableViewModel } from '@model/table-view-model';
 
 moment.locale('es');
 
@@ -32,13 +33,14 @@ export class AppComponent implements OnInit{
   HorariosData: HorarioModel[];
   MatrizHorariaData: MatrizHorariaModel[];
   MatrizHorariaKey: Number;
-  HorariosView: String[] = [];
+
+  //ViewTable--------------
+  TableDataView: TableViewModel[] = [];
+  //-----------------------
   //-----------------------
 
-  visibleHorarios: Boolean = false;
+  visibleHorariosForm: Boolean = false;
   visibleMatrizHorariaForm: Boolean = false;
-  totalHoras: number = 0;
-
   //-----------------------
 
   //Loading Variables------
@@ -83,6 +85,42 @@ export class AppComponent implements OnInit{
         const groupedData = _.groupBy(data, entity => entity.claseDia.nombre);
         //Lo transformamos a arreglo
         this.BloqueHorarioData = Object.values(groupedData);
+        
+        //Primero Llenamos con los datos que tenemos del Bloque Horario
+        this.BloqueHorarioData.forEach(element=>{
+          let tempObject: TableViewModel = { 
+            IdBloques:[],
+            Tiempo:{
+              TotalHoras: [],
+              Horarios: [],
+            }
+          };
+          tempObject.ClaseDia = element[0].claseDia.nombre;
+          element.forEach(item => {
+            tempObject.IdBloques.push(item.id);
+          });
+          //Añadimos al View de la tabla
+          this.TableDataView.push(tempObject);
+        });
+        
+        //Despues de llenarlo con la informacion que teniamos de los Bloques se llenara la informacion de los horarios
+        this.TableDataView.forEach(element=>{
+          element.IdBloques.forEach(async item=>{
+              try {
+                let result: HorarioModel[] = await this.obtenerHorarios(item);
+                let totalHorasTemp: number = 0;
+                let horarioStringTemp: String = '';
+                result.forEach(itm =>{
+                  totalHorasTemp+= moment(itm.horaFinal).diff(moment(itm.horaInicio),'hours');
+                  horarioStringTemp+=moment(itm.horaInicio).format('HH') + ' a '+ moment(itm.horaFinal).format('HH') + '\n';
+                });
+                element.Tiempo.Horarios.push(horarioStringTemp);
+                element.Tiempo.TotalHoras.push(totalHorasTemp);
+              } catch (error) {
+                this.handleError(error);
+              }
+          });
+        });
       })
       .finally(()=>{
         this.loadingTableData = false;
@@ -99,29 +137,8 @@ export class AppComponent implements OnInit{
     this.visibleMatrizHorariaForm = true;
   }
 
-  mostrarObservacion(data): void {
-    //console.log(data.descripcion);
-    this.observacion.setValue(data.descripcion);
-  }
-
-  obtenerBloquesHorariosId(id:Number):void{
-
-  }
-
-  obtenerHorarios(event): void {
-    this.BloqueHorarioService
-    .getHorario(event.target.value)
-    .toPromise()
-    .then((data: HorarioModel[]) =>{
-      this.HorariosData = data;
-      
-      this.HorariosData.forEach(element =>{
-        this.totalHoras+= moment(element.horaFinal).diff(moment(element.horaInicio),'hours');
-        this.HorariosView.push(moment(element.horaInicio).format('HH') + ' a ' + moment(element.horaFinal).format('HH'));
-      })
-
-      this.visibleHorarios = true;
-    }).catch((error)=>this.handleError(error))
+  obtenerHorarios(id: Number): Promise<HorarioModel[]> {
+    return this.BloqueHorarioService.getHorario(id).toPromise();
   }
 
   actualizarMatrizHoraria(): void{
@@ -150,6 +167,42 @@ export class AppComponent implements OnInit{
       .then((data: BloqueHorarioModel[])=>{
         const groupedData = _.groupBy(data, entity => entity.claseDia.nombre);
         this.BloqueHorarioData = Object.values(groupedData);
+        this.TableDataView = [];
+        //Primero Llenamos con los datos que tenemos del Bloque Horario
+        this.BloqueHorarioData.forEach(element=>{
+          let tempObject: TableViewModel = { 
+            IdBloques:[],
+            Tiempo:{
+              TotalHoras: [],
+              Horarios: [],
+            }
+          };
+          tempObject.ClaseDia = element[0].claseDia.nombre;
+          element.forEach(item => {
+            tempObject.IdBloques.push(item.id);
+          });
+          //Añadimos al View de la tabla
+          this.TableDataView.push(tempObject);
+        });
+        
+        //Despues de llenarlo con la informacion que teniamos de los Bloques se llenara la informacion de los horarios
+        this.TableDataView.forEach(element=>{
+          element.IdBloques.forEach(async item=>{
+              try {
+                let result: HorarioModel[] = await this.obtenerHorarios(item);
+                let totalHorasTemp: number = 0;
+                let horarioStringTemp: String = '';
+                result.forEach(itm =>{
+                  totalHorasTemp+= moment(itm.horaFinal).diff(moment(itm.horaInicio),'hours');
+                  horarioStringTemp+=moment(itm.horaInicio).format('HH') + ' a '+ moment(itm.horaFinal).format('HH') + '\n';
+                });
+                element.Tiempo.Horarios.push(horarioStringTemp);
+                element.Tiempo.TotalHoras.push(totalHorasTemp);
+              } catch (error) {
+                this.handleError(error);
+              }
+          });
+        });
       })
       .finally(()=>{
         this.loadingTableData = false;
@@ -157,7 +210,7 @@ export class AppComponent implements OnInit{
       })
       .catch((error)=>this.handleError(error));
   }
-
+  
   async crearBloquesHorarios(bloque: BloqueHorarioTransferObject){
     try {
       await this.BloqueHorarioService.postBloqueHorario(bloque).toPromise();
@@ -206,39 +259,14 @@ export class AppComponent implements OnInit{
   //Select Handle Change-----------------
 
   handleChangeMatrizHorariaSelect():void{
-    this.loadingTableData = true;
-
-    this.BloqueHorarioService
-    .getBloqueHorario(this.MatrizHorariaKey)
-    .toPromise()
-    .then((data: BloqueHorarioModel[])=>{
-      const groupedData = _.groupBy(data, entity => entity.claseDia.nombre);
-      this.BloqueHorarioData = Object.values(groupedData);
-
-    })
-    .finally(()=>{
-      this.loadingTableData = false;
-    })
-    .catch((error)=> this.handleError(error))
+      this.loadingTableData = true;
+      this.actualizarBloquesHorarios(this.MatrizHorariaKey);
   }
 
 
   //-------------------------------------
-  //Modal Handle Function
-  handleCloseHorarios():void{
-    this.visibleHorarios = false;
-    this.HorariosData = [];
-    this.HorariosView = [];
-    this.totalHoras = 0;
-  }
-
-
-  //PrintID
-  printID(id):void{
-    console.log(id)
-  }
-  //
-  //Form Handle Function
+  
+  //Form Handle Function-----------------
   handleCloseMatrizHorariaForm(): void{
     this.visibleMatrizHorariaForm = false;
     this.matrizHorariaForm.reset();
@@ -268,5 +296,18 @@ export class AppComponent implements OnInit{
     });
       
   }
+
+  //Añadir Horarios-------------------
+
+  agregarHorario(arrayIndex: Number,TotalHorasIndex: Number, HorariosIndex : Number,IdBloqueHorario: Number){
+    console.log({
+      arrayIndex,
+      TotalHorasIndex,
+      HorariosIndex,
+      IdBloqueHorario
+    })
+  }
+
+  //----------------------------------
 }
 

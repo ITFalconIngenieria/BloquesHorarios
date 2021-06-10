@@ -107,7 +107,7 @@ import { NzTypographyModule } from 'ng-zorro-antd/typography';
     NzSpinModule,
     NzCalendarModule,
     NzToolTipModule,
-    NzSkeletonModule
+    NzSkeletonModule,
   ],
   schemas: [CUSTOM_ELEMENTS_SCHEMA, NO_ERRORS_SCHEMA],
   providers: [

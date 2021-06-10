@@ -33,26 +33,47 @@
 </form>
 <div nz-row nzType="flex" nzJustify="center" nzAlign="middle" class="min-margin">
     <div nz-col [nzSpan]="18">
-        <nz-table #BloqueHorarioTable [nzData]="BloqueHorarioData" nzBordered [nzLoading]="loadingTableData">
+        <nz-table [nzData]="['']" nzBordered [nzLoading]="loadingTableData">
             <thead class="bold-text">
                 <tr>
                     <th rowspan="2" [nzAlign]="'center'">Clase Dia</th>
                     <th colspan="2" [nzAlign]="'center'">Periodo de Punta</th>
-                    <th colspan="2" [nzAlign]="'center'">Periodo de Intermdio</th>
+                    <th colspan="2" [nzAlign]="'center'">Periodo de Intermedio</th>
                     <th colspan="2" [nzAlign]="'center'">Periodo de Valle</th>
                 </tr>
                 <tr>
-                    <th colspan="2" [nzAlign]="'center'">Horarios</th>
-                    <th colspan="2" [nzAlign]="'center'">Horarios</th>
-                    <th colspan="2" [nzAlign]="'center'">Horarios</th>
+                    <th [nzAlign]="'center'">Total Horas</th>
+                    <th [nzAlign]="'center'">Horarios</th>
+                    <th [nzAlign]="'center'">Total Horas</th>
+                    <th [nzAlign]="'center'">Horarios</th>
+                    <th [nzAlign]="'center'">Total Horas</th>
+                    <th [nzAlign]="'center'">Horarios</th>
                 </tr>
             </thead>
             <tbody>
-                <tr *ngFor="let data of BloqueHorarioTable.data" (click)="mostrarObservacion(data[0])">
-                    <td [nzAlign]="'center'">{{data[0].claseDia.nombre}}</td>
-                    <td colspan="2" [nzAlign]="'center'" (click)="printID(data[0].id)"><a [value]="data[0].id" (click)="obtenerHorarios($event)">Ver Horario</a></td>
-                    <td colspan="2" [nzAlign]="'center'" (click)="printID(data[1].id)"><a [value]="data[1].id" (click)="obtenerHorarios($event)">Ver Horario</a></td>
-                    <td colspan="2" [nzAlign]="'center'" (click)="printID(data[2].id)"><a [value]="data[2].id" (click)="obtenerHorarios($event)">Ver Horario</a></td>
+                <tr *ngFor="let data of TableDataView; index as i;">
+                    <td [nzAlign]="'center'">{{ data.ClaseDia }}</td>
+                    <td [nzAlign]="'center'">{{ data.Tiempo.TotalHoras[0] }}</td>
+                    <td [nzAlign]="'center'">
+                      <button nz-button nzType="link"
+                      (click)="agregarHorario(i,0,0,data.IdBloques[0])"
+                      ><i nz-icon nzType="plus"></i>Añadir</button>
+                      <pre>{{ data.Tiempo.Horarios[0] }}</pre>
+                    </td>
+                    <td [nzAlign]="'center'">{{ data.Tiempo.TotalHoras[1] }}</td>
+                    <td [nzAlign]="'center'">
+                      <button nz-button nzType="link"
+                      (click)="agregarHorario(i,1,1,data.IdBloques[1])"
+                      ><i nz-icon nzType="plus"></i>Añadir</button>
+                      <pre>{{ data.Tiempo.Horarios[1] }}</pre>
+                    </td>
+                    <td [nzAlign]="'center'">{{ data.Tiempo.TotalHoras[2] }}</td>
+                    <td [nzAlign]="'center'">
+                      <button nz-button nzType="link"
+                      (click)="agregarHorario(i,2,2,data.IdBloques[2])"
+                      ><i nz-icon nzType="plus"></i>Añadir</button>
+                      <pre>{{ data.Tiempo.Horarios[2] }}</pre>
+                    </td>
                 </tr>
             </tbody>
         </nz-table>
@@ -68,25 +89,6 @@
         <textarea nz-input [formControl]="observacion">{{observacion.value}}</textarea>
     </div>
 </div>
-<nz-modal 
-[(nzVisible)]="visibleHorarios" 
-[nzTitle]="null" 
-[nzContent]="HorarioContent"
-[nzFooter]="null" 
-(nzOnCancel)="handleCloseHorarios()"
->
-<ng-template #HorarioContent>
-    <nz-statistic [nzValue]="totalHoras" [nzTitle]="'Total de Horas'"></nz-statistic>
-    <nz-list>
-        <div>
-            <h4>Horarios</h4>
-            <div *ngFor="let data of HorariosView">
-                <h5>{{data}}</h5>                       
-            </div>
-        </div>
-    </nz-list>
-</ng-template>
-</nz-modal>
 <nz-drawer
     [nzBodyStyle]="{ height: 'calc(100% - 55px)', overflow: 'auto', 'padding-bottom': '53px' }"
     [nzMaskClosable]="false"
