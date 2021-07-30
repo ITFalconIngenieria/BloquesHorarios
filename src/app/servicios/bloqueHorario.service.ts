@@ -8,6 +8,7 @@ import { FeriadosModel } from '@model/feriados-model';
 import { HorarioModel } from '@model/horario-model';
 import { BloqueHorarioModel } from '@model/bloque-horario-model';
 import { MatrizHorariaModel } from '@model/matriz-horaria-model';
+import { HorarioTransferObject } from '@data-transfer/horario-transfer-object';
 
 const apiUrl = environment.apiUrl;
 
@@ -131,8 +132,8 @@ export class BloqueHorarioService {
     return this.http.get<HorarioModel[]>(`${apiUrl}horarios?filter={"where":{"bloqueHorarioId":"${id}"}}`);
   }
 
-  postHorario(horario) {
-    return this.http.post<HorarioModel>(`${apiUrl}horarios`, horario);
+  postHorario(horario: HorarioTransferObject) {
+    return this.http.post<any>(`${apiUrl}horarios`, horario);
   }
 
   putHorario(id, horario) {

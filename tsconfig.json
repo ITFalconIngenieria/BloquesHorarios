@@ -21,7 +21,8 @@
     "paths": {
       "@service/*":["src/app/servicios/*"],
       "@env/*":["src/environments/*"],
-      "@model/*":["src/app/modelos/*"]
+      "@model/*":["src/app/modelos/*"],
+      "@data-transfer/*":["src/app/dataTransfer/*"]
     }
   },
   "angularCompilerOptions": {

@@ -56,21 +56,24 @@
                     <td [nzAlign]="'center'">{{ data.Tiempo.TotalHoras[0] }}</td>
                     <td [nzAlign]="'center'">
                       <button nz-button nzType="link"
-                      (click)="agregarHorario(i,0,0,data.IdBloques[0])"
+                      (click)="handleSaveDataInVariables(i,0,0,data.IdBloques[0])"
+                      (click)="openHorarioModal()"
                       ><i nz-icon nzType="plus"></i>Añadir</button>
                       <pre>{{ data.Tiempo.Horarios[0] }}</pre>
                     </td>
                     <td [nzAlign]="'center'">{{ data.Tiempo.TotalHoras[1] }}</td>
                     <td [nzAlign]="'center'">
                       <button nz-button nzType="link"
-                      (click)="agregarHorario(i,1,1,data.IdBloques[1])"
+                      (click)="handleSaveDataInVariables(i,1,1,data.IdBloques[1])"
+                      (click)="openHorarioModal()"
                       ><i nz-icon nzType="plus"></i>Añadir</button>
                       <pre>{{ data.Tiempo.Horarios[1] }}</pre>
                     </td>
                     <td [nzAlign]="'center'">{{ data.Tiempo.TotalHoras[2] }}</td>
                     <td [nzAlign]="'center'">
                       <button nz-button nzType="link"
-                      (click)="agregarHorario(i,2,2,data.IdBloques[2])"
+                      (click)="handleSaveDataInVariables(i,2,2,data.IdBloques[2])"
+                      (click)="openHorarioModal()"
                       ><i nz-icon nzType="plus"></i>Añadir</button>
                       <pre>{{ data.Tiempo.Horarios[2] }}</pre>
                     </td>
@@ -139,3 +142,52 @@
     <button type="button" (click)="handleOkMatrizHorariaForm()" class="ant-btn ant-btn-primary"><span>Submit</span></button>
   </div>
 </nz-drawer>
+
+<div>
+  <nz-modal
+    [(nzVisible)]="visibleHorariosModal"
+    nzTitle="Agregar Horario"
+    [nzFooter]="modalFooter"
+    [nzContent]="modalContent"
+    [nzOkLoading]="loadingPostingHorario"
+    (nzOnCancel)="handleCancelModalHorarios()"
+  >
+
+  <ng-template #modalContent>
+    <form nz-form>
+      <div nz-row nzGutter="8">
+        <div nz-col nzSpan="12">
+          <nz-form-item>
+            <nz-form-label>Hora Inicial</nz-form-label>
+              <nz-time-picker
+              nzFormat="HH"
+              [(ngModel)]="InitialTime"
+              [ngModelOptions]="{standalone: true}"
+              ></nz-time-picker>
+          </nz-form-item>
+        </div>
+      </div>
+      <div nz-row nzGutter="8">
+        <div nz-col nzSpan="12">
+          <nz-form-item>
+            <nz-form-label>Hora Final</nz-form-label>
+              <nz-time-picker
+              nzFormat="HH"
+              [(ngModel)]="FinalTime"
+              [ngModelOptions]="{standalone: true}"
+              >
+              </nz-time-picker>
+          </nz-form-item>
+        </div>
+      </div>
+    </form>
+    
+
+  </ng-template>
+
+  <ng-template #modalFooter>
+    <button type="button" (click)="handleCancelModalHorarios()" class="ant-btn ant-btn-danger" style="margin-right: 8px;"><span>Cancel</span></button>
+    <button type="button" (click)="handleOkModalHorarios()" class="ant-btn ant-btn-primary"><span>Submit</span></button>
+  </ng-template>
+  </nz-modal>
+</div>
