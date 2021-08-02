@@ -135,7 +135,7 @@ export class AppComponent implements OnInit{
 
   //Añadir Horarios-------------------
 
-  //Hadle Modal-----------------------
+  //Handle Modal-----------------------
   async handleOkModalHorarios(){
     this.loadingPostingHorario = true;
     const InitialHour = this.InitialTime.toISOString()
@@ -149,14 +149,17 @@ export class AppComponent implements OnInit{
     }
 
     await this.ComponentService.postHorario(transferObject);
-    const tableDataUpdated = await this.ComponentService.updateTableData(
+    const tableDataUpdated = this.ComponentService.updateTableData(
       this.TableDataView,
       this.selectedIdBloqueHorario,
       this.selectedDataTableViewIndex,
       this.selectedHorariosViewIndex,
-      this.selectedTotalHorasIndex
+      this.selectedTotalHorasIndex,
+      InitialHour,
+      FinalHour
     );
-
+    
+    this.TableDataView = tableDataUpdated;
     this.loadingPostingHorario = false;
     this.visibleHorariosModal = false;
   }

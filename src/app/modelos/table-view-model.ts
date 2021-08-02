@@ -1,8 +1,8 @@
 export interface TableViewModel{
-    IdBloques?: Number[],
+    IdBloques?: number[],
     ClaseDia?: String,
     Tiempo?:{
-        TotalHoras: Number[],
+        TotalHoras: number[],
         Horarios: String[]
     }
 };

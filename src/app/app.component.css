@@ -21,3 +21,10 @@
     background: #fff;
 }
 
+.add-button{
+    color: seagreen;
+}
+
+.delete-button{
+    color: red;
+}

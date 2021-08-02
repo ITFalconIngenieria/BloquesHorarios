@@ -214,14 +214,24 @@ export class ComponentService{
         }
     }
 
-    async updateTableData(
+    updateTableData(
         TableDataView: TableViewModel[],
         selectedIdBloqueHorario: number,
         selectedDataTableViewIndex :number,
         selectedHorariosViewIndex: number,
-        selectedTotalHorasIndex: number
-    ): Promise<any>{
+        selectedTotalHorasIndex: number,
+        InitialHour: string,
+        FinalHour: string 
+    ): any{
+        TableDataView[selectedDataTableViewIndex].IdBloques.push(selectedIdBloqueHorario);
+        TableDataView[selectedDataTableViewIndex]
+        .Tiempo
+        .Horarios[selectedHorariosViewIndex]+= moment(InitialHour).format('HH')+ ' a ' + moment(FinalHour).format('HH') + '\n';
         
+        TableDataView[selectedDataTableViewIndex]
+        .Tiempo
+        .TotalHoras[selectedTotalHorasIndex]+= moment(FinalHour).diff(moment(InitialHour),'hours');
 
+        return TableDataView;
     }
 }
