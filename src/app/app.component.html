@@ -27,12 +27,34 @@
             </nz-select>
         </div>
     </div>
-<br>
-<form nz-form>
-  <nz-form-item>
-
-  </nz-form-item>
-</form>
+    <div nz-row class="min-margin">
+      <div nz-col [nzSpan]="16" [nzPush]="4">
+        <form nz-form [formGroup]="viewMatrizHoraria">
+          <div nz-row nzGutter="8">
+            <div nz-col nzSpan="12">
+              <nz-form-item>
+                <nz-form-label>Descripcion</nz-form-label>
+                <nz-form-control>
+                  <nz-input-group>
+                    <textarea nz-input formControlName="Descripcion" nzAutosize (keyup)="modifyTextArea($event)"></textarea>
+                  </nz-input-group>
+                </nz-form-control>
+              </nz-form-item>
+            </div>
+            <div nz-col nzSpan="12">
+              <nz-form-item>
+                <nz-form-label>Observacion</nz-form-label>
+                <nz-form-control>
+                  <nz-input-group>
+                    <textarea nz-input formControlName="Observacion" nzAutosize (keyup)="modifyTextArea($event)"></textarea>
+                  </nz-input-group>
+                </nz-form-control>
+              </nz-form-item>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
 <div nz-row nzType="flex" nzJustify="center" nzAlign="middle" class="min-margin">
     <div nz-col [nzSpan]="18">
         <nz-table [nzData]="['']" nzBordered [nzLoading]="loadingTableData">
@@ -96,43 +118,6 @@
         </nz-table>
     </div>
 </div>
-<!--<div nz-row nzType="flex" nzJustify="center" nzAlign="middle" class="min-margin">
-    <div nz-col>
-        <label>Observaciones</label>
-    </div>
-</div>
-<div nz-row nzType="flex" nzJustify="center" nzAlign="middle" class="min-margin" *ngIf="this.observacion.value">
-    <div nz-col [nzSpan]="16">
-        <textarea nz-input [formControl]="observacion"(keyup)="modifyDescripcion($event)">{{this.observacion.value}}</textarea>
-    </div>
-</div>-->
-<div nz-row nzType="flex" nzJustify="center" nzAlign="middle" class="min-margin">
-  <form nz-form [formGroup]="viewMatrizHoraria">
-    <div nz-row nzGutter="8">
-      <div nz-col nzSpan="12">
-        <nz-form-item>
-          <nz-form-label>Descripcion</nz-form-label>
-          <nz-form-control>
-            <nz-input-group>
-              <textarea nz-input formControlName="Descripcion" nzAutosize (keyup)="modifyTextArea($event)"></textarea>
-            </nz-input-group>
-          </nz-form-control>
-        </nz-form-item>
-      </div>
-      <div nz-col nzSpan="12">
-        <nz-form-item>
-          <nz-form-label>Observacion</nz-form-label>
-          <nz-form-control>
-            <nz-input-group>
-              <textarea nz-input formControlName="Observacion" nzAutosize (keyup)="modifyTextArea($event)"></textarea>
-            </nz-input-group>
-          </nz-form-control>
-        </nz-form-item>
-      </div>
-    </div>
-  </form>
-</div>
-
 <nz-drawer
     [nzBodyStyle]="{ height: 'calc(100% - 55px)', overflow: 'auto', 'padding-bottom': '53px' }"
     [nzMaskClosable]="false"
