@@ -40,6 +40,7 @@ export class ComponentService{
                     Tiempo:{
                       TotalHoras: [],
                       Horarios: [],
+                      HorarioString: []
                     }
                 };
                 tempObject.ClaseDia = element[0].claseDia.nombre;
@@ -48,22 +49,27 @@ export class ComponentService{
                 });
                 TableDataView.push(tempObject);
             })
+
             for(const element of TableDataView){
                 for(const item of element.IdBloques){
                     try{
                         const result: HorarioModel[] = await this.BloqueHorarioService.getHorario(item).toPromise();
                         let totalHorasTemp: number = 0;
                         let horarioStringTemp: String = '';
+                        let horarioActual: String;
+                        let tempHorarioObject:Array<{Horario:String,Id:Number}> =[];
                         for(const itm of result){
+                            horarioActual = moment(itm.horaInicio).format('HH') + ' a '+ moment(itm.horaFinal).format('HH');
                             totalHorasTemp+= moment(itm.horaFinal).diff(moment(itm.horaInicio),'hours');
-                            horarioStringTemp+=moment(itm.horaInicio).format('HH') + ' a '+ moment(itm.horaFinal).format('HH') + '\n';
+                            horarioStringTemp+= horarioActual + '\n';
+                            tempHorarioObject.push({Id:itm.id,Horario:horarioActual});
                         }
-                        element.Tiempo.Horarios.push(horarioStringTemp);
+                        element.Tiempo.Horarios.push(tempHorarioObject);
+                        element.Tiempo.HorarioString.push(horarioStringTemp);
                         element.Tiempo.TotalHoras.push(totalHorasTemp);
                     }catch(error){
                         this.handleError(error);
                     }
-
                 }
             }
             //Retorna Los Valores reales ya que no son argumentos por referencia y se pierde la data al terminar la funcion
@@ -99,6 +105,7 @@ export class ComponentService{
                     Tiempo:{
                       TotalHoras: [],
                       Horarios: [],
+                      HorarioString: []
                     }
                 };
                 tempObject.ClaseDia = element[0].claseDia.nombre;
@@ -113,11 +120,16 @@ export class ComponentService{
                         const result: HorarioModel[] = await this.BloqueHorarioService.getHorario(item).toPromise();
                         let totalHorasTemp: number = 0;
                         let horarioStringTemp: String = '';
+                        let horarioActual: String;
+                        let tempHorarioObject:Array<{Horario:String,Id:Number}> = [];
                         for(const itm of result){
+                            horarioActual = moment(itm.horaInicio).format('HH') + ' a '+ moment(itm.horaFinal).format('HH');
                             totalHorasTemp+= moment(itm.horaFinal).diff(moment(itm.horaInicio),'hours');
-                            horarioStringTemp+=moment(itm.horaInicio).format('HH') + ' a '+ moment(itm.horaFinal).format('HH') + '\n';
+                            horarioStringTemp+= horarioActual + '\n';
+                            tempHorarioObject.push({Id:itm.id,Horario:horarioActual});
                         }
-                        element.Tiempo.Horarios.push(horarioStringTemp);
+                        element.Tiempo.Horarios.push(tempHorarioObject);
+                        element.Tiempo.HorarioString.push(horarioStringTemp);
                         element.Tiempo.TotalHoras.push(totalHorasTemp);
                     }catch(error){
                         this.handleError(error);
@@ -206,9 +218,9 @@ export class ComponentService{
         }
     }
 
-    async postHorario(object: HorarioTransferObject): Promise<void>{
+    async postHorario(object: HorarioTransferObject): Promise<Number>{
         try{
-            await this.BloqueHorarioService.postHorario(object).toPromise();
+            return await(await this.BloqueHorarioService.postHorario(object).toPromise()).id;
         }catch(error){
             this.handleError(error);
         }
@@ -221,17 +233,91 @@ export class ComponentService{
         selectedHorariosViewIndex: number,
         selectedTotalHorasIndex: number,
         InitialHour: string,
-        FinalHour: string 
+        FinalHour: string,
+        IdHorario: Number
     ): any{
+        const horarioString = moment(InitialHour).format('HH')+ ' a ' + moment(FinalHour).format('HH');
         TableDataView[selectedDataTableViewIndex].IdBloques.push(selectedIdBloqueHorario);
         TableDataView[selectedDataTableViewIndex]
         .Tiempo
-        .Horarios[selectedHorariosViewIndex]+= moment(InitialHour).format('HH')+ ' a ' + moment(FinalHour).format('HH') + '\n';
+        .HorarioString[selectedHorariosViewIndex]+=horarioString+'\n';
         
         TableDataView[selectedDataTableViewIndex]
         .Tiempo
         .TotalHoras[selectedTotalHorasIndex]+= moment(FinalHour).diff(moment(InitialHour),'hours');
 
+        TableDataView[selectedDataTableViewIndex]
+        .Tiempo
+        .Horarios[selectedHorariosViewIndex].push({Id:IdHorario,Horario:horarioString});
+
         return TableDataView;
     }
+
+    
+    async updateMatrizHorariaDescripcion(id: Number,object: MatrizHorariaTransferObject): Promise<void>{
+        try{
+            await this.BloqueHorarioService.putMatrizHoraria(id,object).toPromise();
+        }catch(error){
+            this.handleError(error);
+        }
+    }
+    
+    async deleteHorarios(data: TableViewModel,selectedHorarios: Number[]): Promise<TableViewModel>{
+        for(const id of selectedHorarios){
+            await this.BloqueHorarioService.deleteHorario(id,{estado:false}).toPromise()
+        }
+        let returnObject: TableViewModel={
+            IdBloques: data.IdBloques,
+            ClaseDia: data.ClaseDia,
+            Tiempo:{
+                TotalHoras:[],
+                HorarioString:[],
+                Horarios:[]
+            }
+        };
+        for(const item of data.IdBloques){
+            try{
+                const result: HorarioModel[] = await this.BloqueHorarioService.getHorario(item).toPromise();
+                let totalHorasTemp: number = 0;
+                let horarioStringTemp: String = '';
+                let horarioActual: String;
+                let tempHorarioObject:Array<{Horario:String,Id:Number}> = [];
+                for(const itm of result){
+                    horarioActual = moment(itm.horaInicio).format('HH') + ' a '+ moment(itm.horaFinal).format('HH');
+                    totalHorasTemp+= moment(itm.horaFinal).diff(moment(itm.horaInicio),'hours');
+                    horarioStringTemp+= horarioActual + '\n';
+                    tempHorarioObject.push({Id:itm.id,Horario:horarioActual});
+                }
+                returnObject.Tiempo.Horarios.push(tempHorarioObject);
+                returnObject.Tiempo.HorarioString.push(horarioStringTemp);
+                returnObject.Tiempo.TotalHoras.push(totalHorasTemp);
+            }catch(error){
+                this.handleError(error);
+            }
+        }
+
+        return returnObject;
+    }
+
+
+    // Utitlity Functions -------------------------------
+    
+    parseString(delimiter: string, input: string): Array<string>{
+        const parseString = _.split(input,delimiter);
+        const cleanArray = _.compact(parseString);
+        return cleanArray;
+    }
+
+    arrayToString(array: Array<string>): string{
+        let returnString: string = ''
+        for(const element of array){
+            returnString+=element+'\n';
+        }
+        return returnString;
+    }
+    
+    returnIndexMatrizHorariaData(object: MatrizHorariaModel[],id: number): number {
+        return _.findIndex(object, (itm)=> itm.id === id);
+    }
+    //---------------------------------------------------
 }

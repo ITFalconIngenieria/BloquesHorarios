@@ -1,7 +1,7 @@
 export interface MatrizHorariaModel{
     id: Number,
     codigo: String,
-    fechaCreacion: Date,
+    fechaCreacion: String,
     descripcion: String,
     observacion: String,
     estado: Boolean

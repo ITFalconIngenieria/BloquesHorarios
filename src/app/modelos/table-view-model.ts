@@ -1,8 +1,12 @@
 export interface TableViewModel{
     IdBloques?: number[],
-    ClaseDia?: String,
+    ClaseDia?: String | null,
     Tiempo?:{
         TotalHoras: number[],
-        Horarios: String[]
+        Horarios?: Array<{
+            Horario: String,
+            Id: Number
+        }>[]
+        HorarioString?: String[]
     }
 };

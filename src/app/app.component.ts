@@ -24,11 +24,14 @@ export class AppComponent implements OnInit{
   //Variables--------------
     InitialTime: Date = null;
     FinalTime: Date = null;
+    Timeout: any = null;
   //Arreglos---------------
     MatrizHorariaData: MatrizHorariaModel[] = []
-    MatrizHorariaKey: Number;
+    MatrizHorariaKey: number;
     BloqueHorarioData: any[]= []
     TableDataView: TableViewModel[] = []
+    SelectDeleteHorarioView: Array<{Horario:String,Id:Number}> =[];
+    SelectTags: Number[] = [];
   //ViewTable--------------
   //-----------------------
   selectedDataTableViewIndex: number;
@@ -36,15 +39,19 @@ export class AppComponent implements OnInit{
   selectedHorariosViewIndex: number;
   selectedIdBloqueHorario: number;
 
+  selectMatrizHorariaIndex: number = 0;
+
   //-----------------------
   visibleMatrizHorariaForm: Boolean = false;
   visibleHorariosModal: Boolean = false;
+  visibleHorariosDeleteModal: Boolean = false;
   //-----------------------
 
   //Loading Variables------
   loadingSelectData: Boolean = false;
   loadingTableData: Boolean = false;
   loadingPostingHorario: Boolean = false;
+  loadingDeleteHorario: Boolean = false;
   //-----------------------
 
   //FormControls-----------
@@ -55,7 +62,23 @@ export class AppComponent implements OnInit{
     Observacion: new FormControl('')
   });
   //-----------------------
-
+  modifyDescripcion(event : any){
+    clearTimeout(this.Timeout);
+    this.Timeout = setTimeout(async ()=>{
+      if(event.keyCode !== (32 || 13)){
+        this.MatrizHorariaData[this.selectMatrizHorariaIndex].observacion = this.observacion.value;
+        const transferObject: MatrizHorariaTransferObject = {
+          codigo: this.MatrizHorariaData[this.selectMatrizHorariaIndex].codigo,
+          fechaCreacion: this.MatrizHorariaData[this.selectMatrizHorariaIndex].fechaCreacion,
+          descripcion: this.MatrizHorariaData[this.selectMatrizHorariaIndex].descripcion,
+          observacion: this.observacion.value,
+          estado: this.MatrizHorariaData[this.selectMatrizHorariaIndex].estado
+        }
+        await this.ComponentService.updateMatrizHorariaDescripcion(this.MatrizHorariaData[this.selectMatrizHorariaIndex].id,transferObject);
+        console.log(this.MatrizHorariaData[this.selectMatrizHorariaIndex]);
+      }
+    },2000);
+  }
 
   async ngOnInit(): Promise<void>{
     this.loadingTableData = true;
@@ -72,7 +95,9 @@ export class AppComponent implements OnInit{
       this.MatrizHorariaKey = MHK;
       this.BloqueHorarioData = BHD;
       this.TableDataView = TDV;
-
+      
+      this.observacion.setValue(this.MatrizHorariaData[this.selectMatrizHorariaIndex].observacion);
+      //console.table(this.MatrizHorariaData);
     } catch (error) {
       this.ComponentService.handleError(error);
     }
@@ -91,6 +116,7 @@ export class AppComponent implements OnInit{
   async handleChangeMatrizHorariaSelect():Promise<void>{
       this.loadingTableData = true;
       this.loadingSelectData = true;
+      this.observacion.setValue('');
       try{
       const { MHD,MHK,BHD,TDV } = await this.ComponentService.updateMatrizHoraria(
           this.MatrizHorariaData,
@@ -102,6 +128,9 @@ export class AppComponent implements OnInit{
       this.MatrizHorariaKey = MHK;
       this.BloqueHorarioData = BHD;
       this.TableDataView = TDV;
+      
+      this.selectMatrizHorariaIndex = this.ComponentService.returnIndexMatrizHorariaData(this.MatrizHorariaData,this.MatrizHorariaKey);
+      this.observacion.setValue(this.MatrizHorariaData[this.selectMatrizHorariaIndex].descripcion);
       }catch(error){
         this.ComponentService.handleError(error);
       }
@@ -122,7 +151,7 @@ export class AppComponent implements OnInit{
         descripcion: this.matrizHorariaForm.get('Descripcion').value,
         observacion: this.matrizHorariaForm.get('Observacion').value,
         estado: true,
-        fechaCreacion: moment.tz('America/Tegucigalpa').toISOString()
+        fechaCreacion: new Date().toISOString()
       }; 
       try{
         this.MatrizHorariaData = await this.ComponentService.postMatrizHoraria(bodyObject);
@@ -140,6 +169,8 @@ export class AppComponent implements OnInit{
     this.loadingPostingHorario = true;
     const InitialHour = this.InitialTime.toISOString()
     const FinalHour = this.FinalTime.toISOString()
+    this.InitialTime= null;
+    this.FinalTime=null;
 
     const transferObject: HorarioTransferObject = {
       bloqueHorarioId: this.selectedIdBloqueHorario,
@@ -148,7 +179,7 @@ export class AppComponent implements OnInit{
       estado: true
     }
 
-    await this.ComponentService.postHorario(transferObject);
+    const IdHorario = await this.ComponentService.postHorario(transferObject);
     const tableDataUpdated = this.ComponentService.updateTableData(
       this.TableDataView,
       this.selectedIdBloqueHorario,
@@ -156,7 +187,8 @@ export class AppComponent implements OnInit{
       this.selectedHorariosViewIndex,
       this.selectedTotalHorasIndex,
       InitialHour,
-      FinalHour
+      FinalHour,
+      IdHorario
     );
     
     this.TableDataView = tableDataUpdated;
@@ -167,6 +199,8 @@ export class AppComponent implements OnInit{
 
   handleCancelModalHorarios(){
     this.visibleHorariosModal = false;
+    this.InitialTime= null;
+    this.FinalTime=null;
   }
 
   //----------------------------------
@@ -176,23 +210,39 @@ export class AppComponent implements OnInit{
     this.selectedHorariosViewIndex = horariosIndex;
     this.selectedIdBloqueHorario = idBloqueHorario;
 
-    console.log({
-      arrayIndex,
-      totalHorasIndex,
-      horariosIndex,
-      idBloqueHorario
-    })
+    console.log(this.TableDataView[this.selectedDataTableViewIndex]);
   }
 
   openHorarioModal(){
     this.visibleHorariosModal = true;
-    console.log({
-      IdBloque: this.selectedIdBloqueHorario,
-      Horarios: this.TableDataView[this.selectedDataTableViewIndex].Tiempo.Horarios[this.selectedHorariosViewIndex],
-      TotalHoras: this.TableDataView[this.selectedDataTableViewIndex].Tiempo.TotalHoras[this.selectedTotalHorasIndex]
-    })
   }
 
+  //----------------------------------
+
+  openModalDeleteHorarios(){
+    this.visibleHorariosDeleteModal = true;
+    this.SelectDeleteHorarioView = this.TableDataView[this.selectedDataTableViewIndex].Tiempo.Horarios[this.selectedHorariosViewIndex];
+    //console.log(this.TableDataView[this.selectedDataTableViewIndex]);
+  }
+
+  handleCancelDeleteHorarios(){
+    this.visibleHorariosDeleteModal = false;
+    this.SelectDeleteHorarioView=[];
+    this.SelectTags=[];
+  }
+
+  async handleOkDeleteHorarios(){
+    this.loadingDeleteHorario = true;
+
+    const object = await this.ComponentService.deleteHorarios(this.TableDataView[this.selectedDataTableViewIndex],this.SelectTags);
+    this.TableDataView[this.selectedDataTableViewIndex] = object;
+    
+    this.loadingDeleteHorario = false;
+    this.visibleHorariosDeleteModal = false;
+    this.SelectTags=[];
+  }
+
+  //----------------------------------
   //----------------------------------
 }
 
