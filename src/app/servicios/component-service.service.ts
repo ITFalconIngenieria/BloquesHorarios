@@ -299,9 +299,19 @@ export class ComponentService{
         return returnObject;
     }
 
+    async deleteMatrizHoraria(id: Number): Promise<void>{
+        try{
+            await this.BloqueHorarioService.deleteMatrizHoraria(id,{estado:false}).toPromise();
+        }catch(error){
+            this.handleError(error);
+        }
+    }
 
     // Utitlity Functions -------------------------------
-    
+    handleMessage(message: String):void{
+        this.AlertService.success(message.toString());
+    }
+
     parseString(delimiter: string, input: string): Array<string>{
         const parseString = _.split(input,delimiter);
         const cleanArray = _.compact(parseString);

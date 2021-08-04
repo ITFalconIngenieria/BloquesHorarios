@@ -52,30 +52,40 @@ export class AppComponent implements OnInit{
   loadingTableData: Boolean = false;
   loadingPostingHorario: Boolean = false;
   loadingDeleteHorario: Boolean = false;
+  loadingDeleteMatrizHoraria: Boolean = false;
   //-----------------------
 
   //FormControls-----------
-  observacion = new FormControl('');
+  viewMatrizHoraria = new FormGroup({
+    Descripcion: new FormControl(''),
+    Observacion: new FormControl(''),
+  });
   matrizHorariaForm = new FormGroup({
     Codigo: new FormControl(''),
     Descripcion: new FormControl(''),
     Observacion: new FormControl('')
   });
   //-----------------------
-  modifyDescripcion(event : any){
+  modifyTextArea(event : any){
     clearTimeout(this.Timeout);
     this.Timeout = setTimeout(async ()=>{
       if(event.keyCode !== (32 || 13)){
-        this.MatrizHorariaData[this.selectMatrizHorariaIndex].observacion = this.observacion.value;
+        this.MatrizHorariaData[this.selectMatrizHorariaIndex].observacion = this.viewMatrizHoraria.get('Observacion').value;
+        this.MatrizHorariaData[this.selectMatrizHorariaIndex].descripcion = this.viewMatrizHoraria.get('Descripcion').value;
         const transferObject: MatrizHorariaTransferObject = {
           codigo: this.MatrizHorariaData[this.selectMatrizHorariaIndex].codigo,
           fechaCreacion: this.MatrizHorariaData[this.selectMatrizHorariaIndex].fechaCreacion,
-          descripcion: this.MatrizHorariaData[this.selectMatrizHorariaIndex].descripcion,
-          observacion: this.observacion.value,
+          descripcion: this.viewMatrizHoraria.get('Descripcion').value,
+          observacion: this.viewMatrizHoraria.get('Observacion').value,
           estado: this.MatrizHorariaData[this.selectMatrizHorariaIndex].estado
         }
-        await this.ComponentService.updateMatrizHorariaDescripcion(this.MatrizHorariaData[this.selectMatrizHorariaIndex].id,transferObject);
-        console.log(this.MatrizHorariaData[this.selectMatrizHorariaIndex]);
+        try{
+          await this.ComponentService.updateMatrizHorariaDescripcion(this.MatrizHorariaData[this.selectMatrizHorariaIndex].id,transferObject);
+          this.ComponentService.handleMessage("Datos Actualizados");
+        }catch(error){
+          this.ComponentService.handleError(error);
+        }
+        
       }
     },2000);
   }
@@ -96,7 +106,8 @@ export class AppComponent implements OnInit{
       this.BloqueHorarioData = BHD;
       this.TableDataView = TDV;
       
-      this.observacion.setValue(this.MatrizHorariaData[this.selectMatrizHorariaIndex].observacion);
+      this.viewMatrizHoraria.get('Observacion').setValue(this.MatrizHorariaData[this.selectMatrizHorariaIndex].observacion);
+      this.viewMatrizHoraria.get('Descripcion').setValue(this.MatrizHorariaData[this.selectMatrizHorariaIndex].descripcion);
       //console.table(this.MatrizHorariaData);
     } catch (error) {
       this.ComponentService.handleError(error);
@@ -116,7 +127,8 @@ export class AppComponent implements OnInit{
   async handleChangeMatrizHorariaSelect():Promise<void>{
       this.loadingTableData = true;
       this.loadingSelectData = true;
-      this.observacion.setValue('');
+      this.viewMatrizHoraria.get('Observacion').setValue('');
+      this.viewMatrizHoraria.get('Descripcion').setValue('');
       try{
       const { MHD,MHK,BHD,TDV } = await this.ComponentService.updateMatrizHoraria(
           this.MatrizHorariaData,
@@ -128,9 +140,10 @@ export class AppComponent implements OnInit{
       this.MatrizHorariaKey = MHK;
       this.BloqueHorarioData = BHD;
       this.TableDataView = TDV;
-      
+      console.log(this.MatrizHorariaKey);
       this.selectMatrizHorariaIndex = this.ComponentService.returnIndexMatrizHorariaData(this.MatrizHorariaData,this.MatrizHorariaKey);
-      this.observacion.setValue(this.MatrizHorariaData[this.selectMatrizHorariaIndex].descripcion);
+      this.viewMatrizHoraria.get('Observacion').setValue(this.MatrizHorariaData[this.selectMatrizHorariaIndex].observacion);
+      this.viewMatrizHoraria.get('Descripcion').setValue(this.MatrizHorariaData[this.selectMatrizHorariaIndex].descripcion);
       }catch(error){
         this.ComponentService.handleError(error);
       }
@@ -143,6 +156,41 @@ export class AppComponent implements OnInit{
   handleCloseMatrizHorariaForm(): void{
     this.visibleMatrizHorariaForm = false;
     this.matrizHorariaForm.reset();
+  }
+
+  async handleDeleteMatrizHoraria(): Promise<void>{
+    this.loadingDeleteMatrizHoraria = true;
+    this.loadingSelectData = true;
+    this.loadingTableData = true;
+    const id = this.MatrizHorariaData[this.selectMatrizHorariaIndex].id;
+    this.selectMatrizHorariaIndex = 0;
+    this.MatrizHorariaData= [];
+    this.BloqueHorarioData = [];
+    this.TableDataView = [];
+    this.MatrizHorariaKey = null;
+    this.viewMatrizHoraria.get('Observacion').setValue('');
+    this.viewMatrizHoraria.get('Descripcion').setValue('');
+
+
+    await this.ComponentService.deleteMatrizHoraria(id);
+
+    const { MHD,MHK,BHD,TDV } = await this.ComponentService.getInitialData(
+      this.MatrizHorariaData,
+      this.MatrizHorariaKey,
+      this.BloqueHorarioData,
+      this.TableDataView  
+    );
+    this.MatrizHorariaData = MHD;
+    this.MatrizHorariaKey = MHK;
+    this.BloqueHorarioData = BHD;
+    this.TableDataView = TDV;
+    
+    this.viewMatrizHoraria.get('Observacion').setValue(this.MatrizHorariaData[this.selectMatrizHorariaIndex].observacion);
+    this.viewMatrizHoraria.get('Descripcion').setValue(this.MatrizHorariaData[this.selectMatrizHorariaIndex].descripcion);
+    
+    this.loadingDeleteMatrizHoraria = false;
+    this.loadingSelectData = false;
+    this.loadingTableData = false;
   }
 
   async handleOkMatrizHorariaForm(): Promise<void>{

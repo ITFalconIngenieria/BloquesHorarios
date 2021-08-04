@@ -27,7 +27,7 @@ export class BloqueHorarioService {
 
   // Matriz horaria
   getMatrizHoraria() {
-    return this.http.get<MatrizHorariaModel[]>(`${apiUrl}matriz-horarias`);
+    return this.http.get<MatrizHorariaModel[]>(`${apiUrl}matriz-horarias?filter={"where":{"estado":"true"}}`);
   }
 
   postMatrizHoraria(matriz) {
@@ -39,7 +39,7 @@ export class BloqueHorarioService {
   }
 
   deleteMatrizHoraria(id, matriz) {
-    return this.http.patch<MatrizHorariaModel[]>(`${apiUrl}matriz-horarias/${id}`, matriz);
+    return this.http.patch<any>(`${apiUrl}matriz-horarias/${id}`, matriz);
   }
 
   // Bloque horario
