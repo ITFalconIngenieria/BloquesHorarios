@@ -9,14 +9,14 @@
             <h3 nz-typography class="no-margin center-in-col">Bloques Horarios</h3>
         </div>
         <div nz-col [nzSpan]="6" class="center-in-col">
-            <button nz-button nzType="primary" (click)="mostrarFormularioMatrizHoraria()"
+            <button nz-button nzType="primary" (click)="openFormularioMatrizHoraria()"
               style="background-color:seagreen;border-color: seagreen;"
             >
               <i nz-icon nzType="plus"></i>
               Nueva Matriz Horaria</button>
         </div>
         <div nz-col [nzSpan]="6">
-            <button nz-button nzType="danger" [nzLoading]="loadingDeleteMatrizHoraria" [disabled]="!selectMatrizHorariaIndex" (click)="handleDeleteMatrizHoraria()">
+            <button nz-button nzType="danger" [nzLoading]="loadingDeleteMatrizHoraria" [disabled]="!selectMatrizHorariaIndex" (click)="openDeleteConfirmDialog()">
               <i nz-icon nzType="delete" nzTheme="outline"></i>
             Eliminar Matriz Horaria
             </button>
@@ -36,7 +36,7 @@
                 <nz-form-label>Descripcion</nz-form-label>
                 <nz-form-control>
                   <nz-input-group>
-                    <textarea nz-input formControlName="Descripcion" nzAutosize (keyup)="modifyTextArea($event)"></textarea>
+                    <textarea nz-input formControlName="Descripcion" nzAutosize (keyup)="handleModifyTextArea($event)"></textarea>
                   </nz-input-group>
                 </nz-form-control>
               </nz-form-item>
@@ -46,7 +46,7 @@
                 <nz-form-label>Observacion</nz-form-label>
                 <nz-form-control>
                   <nz-input-group>
-                    <textarea nz-input formControlName="Observacion" nzAutosize (keyup)="modifyTextArea($event)"></textarea>
+                    <textarea nz-input formControlName="Observacion" nzAutosize (keyup)="handleModifyTextArea($event)"></textarea>
                   </nz-input-group>
                 </nz-form-control>
               </nz-form-item>
@@ -164,8 +164,8 @@
     </div>
   </form>
   <div class="footer">
-    <button type="button" (click)="handleCloseMatrizHorariaForm()" class="ant-btn ant-btn-danger" style="margin-right: 8px;"><span>Cancel</span></button>
-    <button type="button" (click)="handleOkMatrizHorariaForm()" class="ant-btn ant-btn-primary"><span>Submit</span></button>
+    <button nz-button nzType="danger" (click)="handleCloseMatrizHorariaForm()"  style="margin-right: 8px;"><span>Cancel</span></button>
+    <button nz-button nzType="primary" (click)="handleOkMatrizHorariaForm()" style="background-color:seagreen;border-color: seagreen;" [nzLoading]="loadingPostMatrizHoraria"><span>Submit</span></button>
   </div>
 </nz-drawer>
 
@@ -175,7 +175,6 @@
     nzTitle="Eliminar Horarios"
     [nzFooter]="modalDeleteFooter"
     [nzContent]="modalDeleteContent"
-    [nzOkLoading]="loadingDeleteHorario"
     (nzOnCancel)="handleCancelDeleteHorarios()"
   >
 
@@ -195,8 +194,8 @@
   </ng-template>
 
   <ng-template #modalDeleteFooter>
-    <button type="button" (click)="handleCancelDeleteHorarios()" class="ant-btn ant-btn-danger" style="margin-right: 8px;"><span>Cancel</span></button>
-    <button type="button" (click)="handleOkDeleteHorarios()" class="ant-btn ant-btn-primary"><span>Submit</span></button>
+    <button nz-button nzType="danger"  (click)="handleCancelDeleteHorarios()"  style="margin-right: 8px;"><span>Cancel</span></button>
+    <button nz-button nzType="primary" (click)="handleOkDeleteHorarios()" style="background-color:seagreen;border-color: seagreen;" [nzLoading]="loadingDeleteHorario"><span>Submit</span></button>
   </ng-template>
 
   </nz-modal>
@@ -211,11 +210,14 @@
         <div nz-col nzSpan="12">
           <nz-form-item>
             <nz-form-label>Hora Inicial</nz-form-label>
-              <nz-time-picker
-              nzFormat="HH"
-              [(ngModel)]="InitialTime"
-              [ngModelOptions]="{standalone: true}"
-              ></nz-time-picker>
+              <nz-select [(ngModel)]="InitialTime" [ngModelOptions]="{standalone: true}">
+                <nz-option
+                *ngFor="let Hours of HoursList"
+                [nzLabel]="Hours.Tag"
+                [nzValue]="Hours.Hour"
+                >
+                </nz-option>
+              </nz-select>
           </nz-form-item>
         </div>
       </div>
@@ -223,20 +225,22 @@
         <div nz-col nzSpan="12">
           <nz-form-item>
             <nz-form-label>Hora Final</nz-form-label>
-              <nz-time-picker
-              nzFormat="HH"
-              [(ngModel)]="FinalTime"
-              [ngModelOptions]="{standalone: true}"
+            <nz-select [(ngModel)]="FinalTime" [ngModelOptions]="{standalone: true}">
+              <nz-option
+              *ngFor="let Hours of HoursList"
+              [nzLabel]="Hours.Tag"
+              [nzValue]="Hours.Hour"
               >
-              </nz-time-picker>
+              </nz-option>
+            </nz-select>
           </nz-form-item>
         </div>
       </div>
     </form>
   </div>
   <div *nzModalFooter>
-    <button type="button" (click)="handleCancelModalHorarios()" class="ant-btn ant-btn-danger" style="margin-right: 8px;"><span>Cancel</span></button>
-    <button type="button" (click)="handleOkModalHorarios()" [nzLoading]="loadingPostingHorario" class="ant-btn ant-btn-primary"><span>Submit</span></button>
+    <button nz-button nzType="danger"  (click)="handleCancelModalHorarios()" style="margin-right: 8px;"><span>Cancel</span></button>
+    <button nz-button nzType="primary" (click)="handleOkModalHorarios()" style="background-color:seagreen;border-color: seagreen;" [nzLoading]="loadingPostingHorario"><span>Submit</span></button>
   </div>
   </nz-modal>
 </div>

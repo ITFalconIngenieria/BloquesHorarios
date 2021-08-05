@@ -11,6 +11,7 @@ import { BloqueHorarioTransferObject } from '@data-transfer/bloque-horario-trans
 import { ClaseDiaModel } from '@model/clase-dia-model';
 import { PeriodoModel } from '@model/periodo-model';
 import { HorarioTransferObject } from '@data-transfer/horario-transfer-object';
+import * as internal from 'assert';
 
 @Injectable({
     providedIn: 'root'
@@ -22,12 +23,11 @@ export class ComponentService{
         private AlertService: NzMessageService
     ){}
 
-    async getInitialData(
-            MatrizHorariaData: MatrizHorariaModel[],
-            MatrizHorariaKey: Number,
-            BloqueHorarioData: any[],
-            TableDataView: TableViewModel[]
-    ): Promise<any>{
+    async getInitialData(): Promise<any>{
+        let MatrizHorariaData: MatrizHorariaModel[] = [];
+        let MatrizHorariaKey: Number = 0;
+        let BloqueHorarioData: any[]= [];
+        let TableDataView: TableViewModel[]= [];
         try{
             MatrizHorariaData = await this.BloqueHorarioService.getMatrizHoraria().toPromise();
             MatrizHorariaKey = MatrizHorariaData[0].id;
@@ -84,16 +84,9 @@ export class ComponentService{
         }
     }
 
-    handleError(error:any){
-        console.error(error);
-        this.AlertService.error(`Ha ocurrido un error Inesperado, Codigo:${error.status}`)
-    }
-
-    async updateBloquesHorarios(
-            id: Number,
-            BloqueHorarioData: any[],
-            TableDataView: TableViewModel[]
-    ): Promise<any>{
+    async updateBloquesHorarios(id: Number): Promise<any>{
+        let BloqueHorarioData: any[] = [];
+        let TableDataView: TableViewModel[]= [];
         try{
             const preDataBloqueHorario = await this.BloqueHorarioService.getBloqueHorario(id).toPromise();
             const groupedData = _.groupBy(preDataBloqueHorario,entity => entity.claseDia.nombre);
@@ -147,18 +140,13 @@ export class ComponentService{
         }
     }
 
-    async updateMatrizHoraria(
-            MatrizHorariaData: MatrizHorariaModel[],
-            MatrizHorariaKey: Number,
-            BloqueHorarioData: any[],
-            TableDataView: TableViewModel[],
-    ): Promise<any>{
+    async updateMatrizHoraria(MatrizHorariaKey: Number): Promise<any>{
+        let MatrizHorariaData: MatrizHorariaModel[] = [];
         try{
             MatrizHorariaData = await this.BloqueHorarioService.getMatrizHoraria().toPromise();
-            const {BHD,TDV} = await this.updateBloquesHorarios(MatrizHorariaKey,BloqueHorarioData,TableDataView);
+            const {BHD,TDV} = await this.updateBloquesHorarios(MatrizHorariaKey);
             return {
                 MHD: MatrizHorariaData,
-                MHK: MatrizHorariaKey,
                 BHD: BHD,
                 TDV: TDV
             }
@@ -186,7 +174,7 @@ export class ComponentService{
         }
     }
 
-    async autoGenerateBloqueHorario(id: Number){
+    async autoGenerateBloqueHorario(id: Number): Promise<void>{
         try {
             const clasesDias: ClaseDiaModel[] = await this.BloqueHorarioService.getClaseDia().toPromise();
             const periodos: PeriodoModel[] = await this.BloqueHorarioService.getPeriodo().toPromise();
@@ -226,29 +214,23 @@ export class ComponentService{
         }
     }
 
-    updateTableData(
-        TableDataView: TableViewModel[],
-        selectedIdBloqueHorario: number,
-        selectedDataTableViewIndex :number,
-        selectedHorariosViewIndex: number,
-        selectedTotalHorasIndex: number,
-        InitialHour: string,
-        FinalHour: string,
-        IdHorario: Number
-    ): any{
-        const horarioString = moment(InitialHour).format('HH')+ ' a ' + moment(FinalHour).format('HH');
-        TableDataView[selectedDataTableViewIndex].IdBloques.push(selectedIdBloqueHorario);
-        TableDataView[selectedDataTableViewIndex]
-        .Tiempo
-        .HorarioString[selectedHorariosViewIndex]+=horarioString+'\n';
-        
-        TableDataView[selectedDataTableViewIndex]
-        .Tiempo
-        .TotalHoras[selectedTotalHorasIndex]+= moment(FinalHour).diff(moment(InitialHour),'hours');
+    updateTableData(TableDataView: TableViewModel[],selectedIdBloqueHorario: Number,selectedDataTableViewIndex :Number,selectedHorariosViewIndex: Number,selectedTotalHorasIndex: Number,InitialHour: String,FinalHour: String,IdHorario: Number): TableViewModel[]{
 
-        TableDataView[selectedDataTableViewIndex]
+        const horarioString = moment(InitialHour.toString()).format('HH')+ ' a ' + moment(FinalHour.toString()).format('HH');
+        TableDataView[selectedDataTableViewIndex.valueOf()].IdBloques.push(selectedIdBloqueHorario.valueOf());
+        TableDataView[selectedDataTableViewIndex.valueOf()]
         .Tiempo
-        .Horarios[selectedHorariosViewIndex].push({Id:IdHorario,Horario:horarioString});
+        .HorarioString[selectedHorariosViewIndex.valueOf()]+=horarioString+'\n';
+        
+        const valueTotalHoras = TableDataView[selectedDataTableViewIndex.valueOf()].Tiempo.TotalHoras[selectedTotalHorasIndex.valueOf()].valueOf();
+
+        TableDataView[selectedDataTableViewIndex.valueOf()]
+        .Tiempo
+        .TotalHoras[selectedTotalHorasIndex.valueOf()] = valueTotalHoras + moment(FinalHour.toString()).diff(moment(InitialHour.toString()),'hours');
+
+        TableDataView[selectedDataTableViewIndex.valueOf()]
+        .Tiempo
+        .Horarios[selectedHorariosViewIndex.valueOf()].push({Id:IdHorario,Horario:horarioString});
 
         return TableDataView;
     }
@@ -312,13 +294,18 @@ export class ComponentService{
         this.AlertService.success(message.toString());
     }
 
-    parseString(delimiter: string, input: string): Array<string>{
+    handleError(error:any){
+        console.error(error);
+        this.AlertService.error(`Ha ocurrido un error Inesperado, Codigo:${error.status}`)
+    }
+
+    parseString(delimiter: String, input: String): Array<string>{
         const parseString = _.split(input,delimiter);
         const cleanArray = _.compact(parseString);
         return cleanArray;
     }
 
-    arrayToString(array: Array<string>): string{
+    arrayToString(array: Array<String>): string{
         let returnString: string = ''
         for(const element of array){
             returnString+=element+'\n';
@@ -326,7 +313,7 @@ export class ComponentService{
         return returnString;
     }
     
-    returnIndexMatrizHorariaData(object: MatrizHorariaModel[],id: number): number {
+    returnIndexMatrizHorariaData(object: MatrizHorariaModel[],id: Number): number {
         return _.findIndex(object, (itm)=> itm.id === id);
     }
     //---------------------------------------------------

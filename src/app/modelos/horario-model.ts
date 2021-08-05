@@ -4,5 +4,4 @@ export interface HorarioModel{
     horaFinal: Date,
     estado:Boolean,
     bloqueHorarioId: Number,
-    //bloqueHorario: any
 };

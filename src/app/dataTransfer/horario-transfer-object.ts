@@ -1,6 +1,6 @@
 export interface HorarioTransferObject{
-    bloqueHorarioId: number,
-    horaInicio: string,
-    horaFinal: string,
+    bloqueHorarioId: Number,
+    horaInicio: String,
+    horaFinal: String,
     estado: Boolean
 }
