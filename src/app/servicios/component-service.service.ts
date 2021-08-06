@@ -28,7 +28,7 @@ export class ComponentService{
         let MatrizHorariaKey: Number = 0;
         let BloqueHorarioData: any[]= [];
         let TableDataView: TableViewModel[]= [];
-        let DisbleHoursList: Array<Array<Number>> = [];
+        let DisbleHoursList: Number[][] = [];
         try{
             MatrizHorariaData = await this.BloqueHorarioService.getMatrizHoraria().toPromise();
             MatrizHorariaKey = MatrizHorariaData[0].id;
@@ -52,6 +52,7 @@ export class ComponentService{
             })
 
             for(const element of TableDataView){
+                let hourArray: Number[] = [];
                 for(const item of element.IdBloques){
                     try{
                         const result: HorarioModel[] = await this.BloqueHorarioService.getHorario(item).toPromise();
@@ -59,7 +60,6 @@ export class ComponentService{
                         let horarioStringTemp: String = '';
                         let horarioActual: String;
                         let tempHorarioObject:Array<{Horario:String,Id:Number}> =[];
-                        let hourArray: Number[] = [];
                         for(const itm of result){
                             hourArray.push(moment(itm.horaInicio).hours());
                             hourArray.push(moment(itm.horaFinal).hours());
@@ -72,7 +72,6 @@ export class ComponentService{
                             horarioStringTemp+= horarioActual + '\n';
                             tempHorarioObject.push({Id:itm.id,Horario:horarioActual});
                         }
-                        DisbleHoursList.push(hourArray);
                         element.Tiempo.Horarios.push(tempHorarioObject);
                         element.Tiempo.HorarioString.push(horarioStringTemp);
                         element.Tiempo.TotalHoras.push(totalHorasTemp);
@@ -80,6 +79,7 @@ export class ComponentService{
                         this.handleError(error);
                     }
                 }
+                DisbleHoursList.push(hourArray);
             }
             //Retorna Los Valores reales ya que no son argumentos por referencia y se pierde la data al terminar la funcion
             return {
@@ -97,7 +97,7 @@ export class ComponentService{
     async updateBloquesHorarios(id: Number): Promise<any>{
         let BloqueHorarioData: any[] = [];
         let TableDataView: TableViewModel[]= [];
-        let DisbleHoursList: Array<Array<Number>> = [];
+        let DisbleHoursList: Number[][] = [];
         try{
             const preDataBloqueHorario = await this.BloqueHorarioService.getBloqueHorario(id).toPromise();
             const groupedData = _.groupBy(preDataBloqueHorario,entity => entity.claseDia.nombre);
@@ -118,6 +118,7 @@ export class ComponentService{
                 TableDataView.push(tempObject);
             });
             for(const element of TableDataView){
+                let hourArray: Number[] = [];
                 for(const item of element.IdBloques){
                     try{
                         const result: HorarioModel[] = await this.BloqueHorarioService.getHorario(item).toPromise();
@@ -125,24 +126,27 @@ export class ComponentService{
                         let horarioStringTemp: String = '';
                         let horarioActual: String;
                         let tempHorarioObject:Array<{Horario:String,Id:Number}> = [];
-                        let hourArray: Number[] = [];
                         for(const itm of result){
                             hourArray.push(moment(itm.horaInicio).hours());
                             hourArray.push(moment(itm.horaFinal).hours());
                             horarioActual = moment(itm.horaInicio).format('HH') + ' a '+ moment(itm.horaFinal).format('HH');
-                            totalHorasTemp+= moment(itm.horaFinal).diff(moment(itm.horaInicio),'hours');
+                            if(moment(itm.horaFinal).hours() > moment(itm.horaInicio).hours()){
+                                totalHorasTemp+= moment(itm.horaFinal).diff(moment(itm.horaInicio),'hours');
+                            }else{
+                                totalHorasTemp+= (moment(itm.horaFinal).hours()+24) - moment(itm.horaInicio).hours();
+                            }
                             horarioStringTemp+= horarioActual + '\n';
                             tempHorarioObject.push({Id:itm.id,Horario:horarioActual});
                         }
-                        DisbleHoursList.push(hourArray);
                         element.Tiempo.Horarios.push(tempHorarioObject);
                         element.Tiempo.HorarioString.push(horarioStringTemp);
                         element.Tiempo.TotalHoras.push(totalHorasTemp);
                     }catch(error){
                         this.handleError(error);
                     }
-                
+                    
                 }
+                DisbleHoursList.push(hourArray);
             }
 
             return {
@@ -270,7 +274,7 @@ export class ComponentService{
     }
     
     async deleteHorarios(data: TableViewModel,selectedHorarios: Number[]): Promise<any>{
-        let DisbleHoursList: Array<Number> = [];
+        let DisbleHoursList: Number[] = [];
         for(const id of selectedHorarios){
             await this.BloqueHorarioService.deleteHorario(id,{estado:false}).toPromise()
         }

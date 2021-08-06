@@ -30,13 +30,13 @@ export class AppComponent implements OnInit{
   //--------------------------
 
   //Component Arrays----------------------------------------------------------------------------------------------------
-  MatrizHorariaData: MatrizHorariaModel[] = []
+  MatrizHorariaData: Array<MatrizHorariaModel> = []
   MatrizHorariaKey: Number;
-  BloqueHorarioData: any[]= []
-  TableDataView: TableViewModel[] = []
+  BloqueHorarioData: Array<any> = []
+  TableDataView: Array<TableViewModel> = []
   SelectDeleteHorarioView: Array<{Horario:String,Id:Number}> =[];
   SelectModifyHorarioView: Array<{Horario:String,Id: Number}> =[];
-  SelectTags: Number[] = [];
+  SelectTags: Array<Number> = [];
   HoursList: Array<{Tag:String,Hour:Number}> = 
   [
     {Tag:"00",Hour:0},{Tag:"01",Hour:1},{Tag:"02",Hour:2},{Tag:"03",Hour:3},{Tag:"04",Hour:4},{Tag:"05",Hour:5},
@@ -87,7 +87,7 @@ export class AppComponent implements OnInit{
   });
   //---------------------------------
   
-  async ngOnInit(): Promise<void>{
+  async ngOnInit(): Promise<void>{ //Descartado de fallos
     this.loadingTableData = true;
     this.loadingSelectData = true;
 
@@ -167,6 +167,30 @@ export class AppComponent implements OnInit{
 
   //HandleFunctions-----------------------------------------------------------------------------------------------------
   handleOkModifyHorario(){
+    if(this.ComponentService.handleHoursOverflow(this.TableDataView[this.selectedDataTableViewIndex.valueOf()],this.InitialTime,this.FinalTime)){
+      this.ComponentService.handleMessageError("La cantidad excede las 24 horas por bloque, intente ingresar otro valor");
+    }else{
+      
+      const ActualDate= new Date();
+      const InitialHour = new Date(
+        ActualDate.getFullYear(),
+        ActualDate.getMonth(),
+        ActualDate.getDay(),
+        this.InitialTime.valueOf(),
+        0,
+        0,
+        0
+      ).toISOString();
+      const FinalHour = new Date(
+        ActualDate.getFullYear(),
+        ActualDate.getMonth(),
+        ActualDate.getDay(),
+        this.FinalTime.valueOf(),
+        0,
+        0,
+        0
+      ).toISOString();
+    }
     this.visibleModifyHorarioModal = false;
   }
 
@@ -186,12 +210,13 @@ export class AppComponent implements OnInit{
     this.visibleHorariosDeleteModal = false;
     this.SelectTags=[];
   }
-
-  async handleChangeMatrizHorariaSelect():Promise<void>{
+  
+  async handleChangeMatrizHorariaSelect():Promise<void>{ //Posible fallo aqui
     this.loadingTableData = true;
     this.loadingSelectData = true;
     this.viewMatrizHoraria.get('Observacion').setValue('');
     this.viewMatrizHoraria.get('Descripcion').setValue('');
+
     try{
     
     const { MHD,BHD,TDV,DHL } = await this.ComponentService.updateMatrizHoraria(this.MatrizHorariaKey);
@@ -202,6 +227,7 @@ export class AppComponent implements OnInit{
     this.selectMatrizHorariaIndex = this.ComponentService.returnIndexMatrizHorariaData(this.MatrizHorariaData,this.MatrizHorariaKey);
     this.viewMatrizHoraria.get('Observacion').setValue(this.MatrizHorariaData[this.selectMatrizHorariaIndex.valueOf()].observacion);
     this.viewMatrizHoraria.get('Descripcion').setValue(this.MatrizHorariaData[this.selectMatrizHorariaIndex.valueOf()].descripcion);
+
     }catch(error){
       this.ComponentService.handleError(error);
     }
@@ -261,38 +287,38 @@ export class AppComponent implements OnInit{
 
   async handleOkModalHorarios(){
   this.loadingPostingHorario = true;
-  const ActualDate= new Date();
-  const InitialHour = new Date(
-    ActualDate.getFullYear(),
-    ActualDate.getMonth(),
-    ActualDate.getDay(),
-    this.InitialTime.valueOf(),
-    0,
-    0,
-    0
-  ).toISOString();
-  const FinalHour = new Date(
-    ActualDate.getFullYear(),
-    ActualDate.getMonth(),
-    ActualDate.getDay(),
-    this.FinalTime.valueOf(),
-    0,
-    0,
-    0
-  ).toISOString();
-
-  
-  const transferObject: HorarioTransferObject = {
-    bloqueHorarioId: this.selectedIdBloqueHorario,
-    horaInicio: InitialHour, 
-    horaFinal: FinalHour,
-    estado: true
-  }
-  
   if(this.ComponentService.handleHoursOverflow(this.TableDataView[this.selectedDataTableViewIndex.valueOf()],this.InitialTime,this.FinalTime)){
     this.ComponentService.handleMessageError("La cantidad excede las 24 horas por bloque, intente ingresar otro valor");
   }else{
+    
+    const ActualDate= new Date();
+    const InitialHour = new Date(
+      ActualDate.getFullYear(),
+      ActualDate.getMonth(),
+      ActualDate.getDay(),
+      this.InitialTime.valueOf(),
+      0,
+      0,
+      0
+    ).toISOString();
+    const FinalHour = new Date(
+      ActualDate.getFullYear(),
+      ActualDate.getMonth(),
+      ActualDate.getDay(),
+      this.FinalTime.valueOf(),
+      0,
+      0,
+      0
+    ).toISOString();
+  
+    const transferObject: HorarioTransferObject = {
+      bloqueHorarioId: this.selectedIdBloqueHorario,
+      horaInicio: InitialHour, 
+      horaFinal: FinalHour,
+      estado: true
+    }
     const IdHorario = await this.ComponentService.postHorario(transferObject);
+    
     const {TDV,DHL} = this.ComponentService.updateTableData(
       this.TableDataView,
       this.selectedIdBloqueHorario,
