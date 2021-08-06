@@ -35,6 +35,7 @@ export class AppComponent implements OnInit{
   BloqueHorarioData: any[]= []
   TableDataView: TableViewModel[] = []
   SelectDeleteHorarioView: Array<{Horario:String,Id:Number}> =[];
+  SelectModifyHorarioView: Array<{Horario:String,Id: Number}> =[];
   SelectTags: Number[] = [];
   HoursList: Array<{Tag:String,Hour:Number}> = 
   [
@@ -43,21 +44,24 @@ export class AppComponent implements OnInit{
     {Tag:"12",Hour:12},{Tag:"13",Hour:13},{Tag:"14",Hour:14},{Tag:"15",Hour:15},{Tag:"16",Hour:16},{Tag:"17",Hour:17},
     {Tag:"18",Hour:18},{Tag:"19",Hour:19},{Tag:"20",Hour:20},{Tag:"21",Hour:21},{Tag:"22",Hour:22},{Tag:"23",Hour:23}
   ]
-  DisbleHoursList: Array<Array<Number>> = [];
+  DisbleHoursList: Array<Array<Number>> = [[],[],[]];
   //---------------------------------------------------------------------------------------------------------------------
 
   //Select Value Variables-------------
-  selectedDataTableViewIndex: Number;
+  selectedDataTableViewIndex: Number = 0;
   selectedTotalHorasIndex: Number;
   selectedHorariosViewIndex: Number;
   selectedIdBloqueHorario: Number;
   selectMatrizHorariaIndex: Number = 0;
+  selectedHorarioModifyId: Number;
   //------------------------------------
 
   //Visible Control Variables-----------------
   visibleMatrizHorariaForm: Boolean = false;
   visibleHorariosModal: Boolean = false;
   visibleHorariosDeleteModal: Boolean = false;
+
+  visibleModifyHorarioModal: Boolean = false;
   //------------------------------------------
 
   //Loading Variables-------------------------
@@ -67,6 +71,8 @@ export class AppComponent implements OnInit{
   loadingDeleteHorario: Boolean = false;
   loadingDeleteMatrizHoraria: Boolean = false;
   loadingPostMatrizHoraria: Boolean = false;
+
+  loadingModifyHorarioModal: Boolean = false;
   //------------------------------------------
 
   //Form Group-----------------------
@@ -86,11 +92,12 @@ export class AppComponent implements OnInit{
     this.loadingSelectData = true;
 
     try {
-      const { MHD,MHK,BHD,TDV } = await this.ComponentService.getInitialData();
+      const { MHD,MHK,BHD,TDV,DHL} = await this.ComponentService.getInitialData();
       this.MatrizHorariaData = MHD;
       this.MatrizHorariaKey = MHK;
       this.BloqueHorarioData = BHD;
       this.TableDataView = TDV;
+      this.DisbleHoursList = DHL;
       
       this.viewMatrizHoraria.get('Observacion').setValue(this.MatrizHorariaData[this.selectMatrizHorariaIndex.valueOf()].observacion);
       this.viewMatrizHoraria.get('Descripcion').setValue(this.MatrizHorariaData[this.selectMatrizHorariaIndex.valueOf()].descripcion);
@@ -98,7 +105,6 @@ export class AppComponent implements OnInit{
     } catch (error) {
       this.ComponentService.handleError(error);
     }
-    
     this.loadingTableData = false;
     this.loadingSelectData = false;
   }
@@ -111,7 +117,7 @@ export class AppComponent implements OnInit{
   handleCancelModalHorarios(){
     this.visibleHorariosModal = false;
     this.InitialTime= null;
-    this.FinalTime=null;
+    this.FinalTime= null;
   }
 
   openModalDeleteHorarios(){
@@ -143,10 +149,27 @@ export class AppComponent implements OnInit{
       nzCancelText:"No",
     });
   }
+
+  openModifyHorarioModal():void{
+    this.visibleModifyHorarioModal = true;
+    this.SelectModifyHorarioView = this.TableDataView[this.selectedDataTableViewIndex.valueOf()].Tiempo.Horarios[this.selectedHorariosViewIndex.valueOf()];
+  }
+
+  handleCancelModifyHorario(): void{
+    this.visibleModifyHorarioModal = false;
+    this.SelectModifyHorarioView=[];
+    this.selectedHorarioModifyId = null;
+    this.InitialTime = null;
+    this.FinalTime = null;
+  }
   //-------------------------------------------------------------------------------------------------------------------------------------------------------
 
 
   //HandleFunctions-----------------------------------------------------------------------------------------------------
+  handleOkModifyHorario(){
+    this.visibleModifyHorarioModal = false;
+  }
+
   handleSaveDataInVariables(arrayIndex: Number,totalHorasIndex: Number, horariosIndex : Number,idBloqueHorario: Number){
     this.selectedDataTableViewIndex = arrayIndex;
     this.selectedTotalHorasIndex = totalHorasIndex;
@@ -156,8 +179,9 @@ export class AppComponent implements OnInit{
 
   async handleOkDeleteHorarios(){
     this.loadingDeleteHorario = true;
-    const object = await this.ComponentService.deleteHorarios(this.TableDataView[this.selectedDataTableViewIndex.valueOf()],this.SelectTags);
-    this.TableDataView[this.selectedDataTableViewIndex.valueOf()] = object;
+    const {TDV,DHL} = await this.ComponentService.deleteHorarios(this.TableDataView[this.selectedDataTableViewIndex.valueOf()],this.SelectTags);
+    this.TableDataView[this.selectedDataTableViewIndex.valueOf()] = TDV;
+    this.DisbleHoursList[this.selectedDataTableViewIndex.valueOf()]= DHL;
     this.loadingDeleteHorario = false;
     this.visibleHorariosDeleteModal = false;
     this.SelectTags=[];
@@ -169,11 +193,12 @@ export class AppComponent implements OnInit{
     this.viewMatrizHoraria.get('Observacion').setValue('');
     this.viewMatrizHoraria.get('Descripcion').setValue('');
     try{
-    const { MHD,BHD,TDV } = await this.ComponentService.updateMatrizHoraria(this.MatrizHorariaKey);
+    
+    const { MHD,BHD,TDV,DHL } = await this.ComponentService.updateMatrizHoraria(this.MatrizHorariaKey);
     this.MatrizHorariaData = MHD;
     this.BloqueHorarioData = BHD;
     this.TableDataView = TDV;
-    console.log(this.MatrizHorariaKey);
+    this.DisbleHoursList = DHL;
     this.selectMatrizHorariaIndex = this.ComponentService.returnIndexMatrizHorariaData(this.MatrizHorariaData,this.MatrizHorariaKey);
     this.viewMatrizHoraria.get('Observacion').setValue(this.MatrizHorariaData[this.selectMatrizHorariaIndex.valueOf()].observacion);
     this.viewMatrizHoraria.get('Descripcion').setValue(this.MatrizHorariaData[this.selectMatrizHorariaIndex.valueOf()].descripcion);
@@ -200,11 +225,12 @@ export class AppComponent implements OnInit{
 
   await this.ComponentService.deleteMatrizHoraria(id);
 
-  const { MHD,MHK,BHD,TDV } = await this.ComponentService.getInitialData();
+  const { MHD,MHK,BHD,TDV,DHL } = await this.ComponentService.getInitialData();
   this.MatrizHorariaData = MHD;
   this.MatrizHorariaKey = MHK;
   this.BloqueHorarioData = BHD;
   this.TableDataView = TDV;
+  this.DisbleHoursList = DHL;
   
   this.viewMatrizHoraria.get('Observacion').setValue(this.MatrizHorariaData[this.selectMatrizHorariaIndex.valueOf()].observacion);
   this.viewMatrizHoraria.get('Descripcion').setValue(this.MatrizHorariaData[this.selectMatrizHorariaIndex.valueOf()].descripcion);
@@ -255,31 +281,37 @@ export class AppComponent implements OnInit{
     0
   ).toISOString();
 
-  this.InitialTime=0;
-  this.FinalTime=0;
-
+  
   const transferObject: HorarioTransferObject = {
     bloqueHorarioId: this.selectedIdBloqueHorario,
     horaInicio: InitialHour, 
     horaFinal: FinalHour,
     estado: true
   }
-
-  const IdHorario = await this.ComponentService.postHorario(transferObject);
-  const tableDataUpdated = this.ComponentService.updateTableData(
-    this.TableDataView,
-    this.selectedIdBloqueHorario,
-    this.selectedDataTableViewIndex,
-    this.selectedHorariosViewIndex,
-    this.selectedTotalHorasIndex,
-    InitialHour,
-    FinalHour,
-    IdHorario
-  );
   
-  this.TableDataView = tableDataUpdated;
+  if(this.ComponentService.handleHoursOverflow(this.TableDataView[this.selectedDataTableViewIndex.valueOf()],this.InitialTime,this.FinalTime)){
+    this.ComponentService.handleMessageError("La cantidad excede las 24 horas por bloque, intente ingresar otro valor");
+  }else{
+    const IdHorario = await this.ComponentService.postHorario(transferObject);
+    const {TDV,DHL} = this.ComponentService.updateTableData(
+      this.TableDataView,
+      this.selectedIdBloqueHorario,
+      this.selectedDataTableViewIndex,
+      this.selectedHorariosViewIndex,
+      this.selectedTotalHorasIndex,
+      InitialHour,
+      FinalHour,
+      IdHorario,
+      this.DisbleHoursList[this.selectedDataTableViewIndex.valueOf()]
+    );
+    
+    this.TableDataView = TDV;
+    this.DisbleHoursList[this.selectedDataTableViewIndex.valueOf()] = DHL;
+  }
   this.loadingPostingHorario = false;
   this.visibleHorariosModal = false;
+  this.InitialTime=null;
+  this.FinalTime=null;
   }
   
   handleModifyTextArea(event : any){
@@ -304,6 +336,10 @@ export class AppComponent implements OnInit{
         
       }
     },2000);
+  }
+
+  handleDisableOption(value: Number):Boolean{
+    return this.DisbleHoursList[this.selectedDataTableViewIndex.valueOf()].indexOf(value)!==-1
   }
   //--------------------------------------------------------------------------------------------------------------------
 }

@@ -88,7 +88,8 @@
                       (click)="openModalDeleteHorarios()"
                       ><i class="delete-button" nz-icon nzType="delete" nzTheme="outline"></i></button>
                       <button nz-button nzType="link"
-
+                      (click)="handleSaveDataInVariables(i,0,0,data.IdBloques[0])"
+                      (click)="openModifyHorarioModal()"
                       ><i nz-icon nzType="edit" nzTheme="outline"></i></button>
                       <pre>{{ data.Tiempo.HorarioString[0] }}</pre>
                     </td>
@@ -103,7 +104,8 @@
                       (click)="openModalDeleteHorarios()"
                       ><i class="delete-button" nz-icon nzType="delete" nzTheme="outline"></i></button>
                       <button nz-button nzType="link"
-                      
+                      (click)="handleSaveDataInVariables(i,1,1,data.IdBloques[1])"
+                      (click)="openModifyHorarioModal()"
                       ><i nz-icon nzType="edit" nzTheme="outline"></i></button>
                       <pre>{{ data.Tiempo.HorarioString[1] }}</pre>
                     </td>
@@ -118,7 +120,8 @@
                       (click)="openModalDeleteHorarios()"
                       ><i class="delete-button" nz-icon nzType="delete" nzTheme="outline"></i></button>
                       <button nz-button nzType="link"
-                      
+                      (click)="handleSaveDataInVariables(i,2,2,data.IdBloques[2])"
+                      (click)="openModifyHorarioModal()"
                       ><i nz-icon nzType="edit" nzTheme="outline"></i></button>
                       <pre>{{ data.Tiempo.HorarioString[2] }}</pre>
                     </td>
@@ -193,7 +196,7 @@
         <div nz-col nzSpan="24">
           <nz-form-item>
             <nz-form-label>Horario</nz-form-label>
-              <nz-select nzMode="tags" [(ngModel)]="SelectTags" [ngModelOptions]="{standalone: true}">
+              <nz-select nzMode="tags" [(ngModel)]="SelectTags" [ngModelOptions]="{standalone: true}" nzAllowClear>
                 <nz-option *ngFor="let option of SelectDeleteHorarioView" [nzLabel]="option.Horario" [nzValue]="option.Id"></nz-option>
               </nz-select>
           </nz-form-item>
@@ -204,7 +207,7 @@
 
   <ng-template #modalDeleteFooter>
     <button nz-button nzType="danger"  (click)="handleCancelDeleteHorarios()"  style="margin-right: 8px;"><span>Cancel</span></button>
-    <button nz-button nzType="primary" (click)="handleOkDeleteHorarios()" style="background-color:seagreen;border-color: seagreen;" [nzLoading]="loadingDeleteHorario"><span>Submit</span></button>
+    <button nz-button nzType="primary" [disabled]="!SelectTags.length" (click)="handleOkDeleteHorarios()" style="background-color:seagreen;border-color: seagreen;" [nzLoading]="loadingDeleteHorario"><span>Submit</span></button>
   </ng-template>
 
   </nz-modal>
@@ -219,11 +222,12 @@
         <div nz-col nzSpan="12">
           <nz-form-item>
             <nz-form-label>Hora Inicial</nz-form-label>
-              <nz-select [(ngModel)]="InitialTime" [ngModelOptions]="{standalone: true}">
+              <nz-select [(ngModel)]="InitialTime"  [ngModelOptions]="{standalone: true}" nzAllowClear>
                 <nz-option
                 *ngFor="let Hours of HoursList"
                 [nzLabel]="Hours.Tag"
                 [nzValue]="Hours.Hour"
+                [nzDisabled]="handleDisableOption(Hours.Hour)"
                 >
                 </nz-option>
               </nz-select>
@@ -234,11 +238,12 @@
         <div nz-col nzSpan="12">
           <nz-form-item>
             <nz-form-label>Hora Final</nz-form-label>
-            <nz-select [(ngModel)]="FinalTime" [ngModelOptions]="{standalone: true}">
+            <nz-select [(ngModel)]="FinalTime" [ngModelOptions]="{standalone: true}" nzAllowClear>
               <nz-option
               *ngFor="let Hours of HoursList"
               [nzLabel]="Hours.Tag"
               [nzValue]="Hours.Hour"
+              [nzDisabled]="handleDisableOption(Hours.Hour)"
               >
               </nz-option>
             </nz-select>
@@ -249,7 +254,60 @@
   </div>
   <div *nzModalFooter>
     <button nz-button nzType="danger"  (click)="handleCancelModalHorarios()" style="margin-right: 8px;"><span>Cancel</span></button>
-    <button nz-button nzType="primary" (click)="handleOkModalHorarios()" style="background-color:seagreen;border-color: seagreen;" [nzLoading]="loadingPostingHorario"><span>Submit</span></button>
+    <button nz-button nzType="primary" [disabled]="!InitialTime && !FinalTime" (click)="handleOkModalHorarios()" style="background-color:seagreen;border-color: seagreen;" [nzLoading]="loadingPostingHorario"><span>Submit</span></button>
   </div>
+  </nz-modal>
+  
+  <nz-modal
+    [(nzVisible)]="visibleModifyHorarioModal"
+    (nzOnCancel)="handleCancelModifyHorario()"
+    nzTitle="Modificar Horarios"
+    [nzContent]="modalModifyContent"
+    [nzFooter]="modalModifyFooter"
+  >
+    <ng-template #modalModifyContent>
+
+      <div nz-row>
+        <div nz-col nzSpan="24">
+            <h5>Horario</h5>
+              <nz-select [(ngModel)]="selectedHorarioModifyId" nzAllowClear>
+                <nz-option *ngFor="let option of SelectModifyHorarioView" [nzLabel]="option.Horario" [nzValue]="option.Id"></nz-option>
+              </nz-select>
+        </div>
+      </div>
+      <div nz-row style="margin-top: 10px;">
+        <div nz-col nzSpan="24">
+          <h5>Hora Inicial</h5>
+          <nz-select [(ngModel)]="InitialTime" [nzDisabled]="!selectedHorarioModifyId" nzAllowClear>
+            <nz-option
+            *ngFor="let Hours of HoursList"
+            [nzLabel]="Hours.Tag"
+            [nzValue]="Hours.Hour"
+            [nzDisabled]="handleDisableOption(Hours.Hour)"
+            >
+          </nz-option>
+          </nz-select>
+        </div>
+      </div>
+      <div nz-row style="margin-top: 10px;">
+        <div nz-col nzSpan="24">
+          <h5>Hora Final</h5>
+          <nz-select [(ngModel)]="FinalTime" [nzDisabled]="!selectedHorarioModifyId" nzAllowClear>
+            <nz-option
+            *ngFor="let Hours of HoursList"
+            [nzLabel]="Hours.Tag"
+            [nzValue]="Hours.Hour"
+            [nzDisabled]="handleDisableOption(Hours.Hour)"
+            >
+            </nz-option>
+          </nz-select>
+        </div>
+      </div>
+    </ng-template>
+
+    <ng-template #modalModifyFooter>
+      <button nz-button nzType="danger"  (click)="handleCancelModifyHorario()"  style="margin-right: 8px;"><span>Cancel</span></button>
+      <button nz-button nzType="primary" [disabled]="!InitialTime && !FinalTime && !selectedHorarioModifyId" (click)="handleOkModifyHorario()" style="background-color:seagreen;border-color: seagreen;" [nzLoading]="loadingDeleteHorario"><span>Submit</span></button>
+    </ng-template>
   </nz-modal>
 </div>

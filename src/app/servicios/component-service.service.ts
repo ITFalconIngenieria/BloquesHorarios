@@ -11,7 +11,7 @@ import { BloqueHorarioTransferObject } from '@data-transfer/bloque-horario-trans
 import { ClaseDiaModel } from '@model/clase-dia-model';
 import { PeriodoModel } from '@model/periodo-model';
 import { HorarioTransferObject } from '@data-transfer/horario-transfer-object';
-import * as internal from 'assert';
+
 
 @Injectable({
     providedIn: 'root'
@@ -28,6 +28,7 @@ export class ComponentService{
         let MatrizHorariaKey: Number = 0;
         let BloqueHorarioData: any[]= [];
         let TableDataView: TableViewModel[]= [];
+        let DisbleHoursList: Array<Array<Number>> = [];
         try{
             MatrizHorariaData = await this.BloqueHorarioService.getMatrizHoraria().toPromise();
             MatrizHorariaKey = MatrizHorariaData[0].id;
@@ -58,12 +59,20 @@ export class ComponentService{
                         let horarioStringTemp: String = '';
                         let horarioActual: String;
                         let tempHorarioObject:Array<{Horario:String,Id:Number}> =[];
+                        let hourArray: Number[] = [];
                         for(const itm of result){
+                            hourArray.push(moment(itm.horaInicio).hours());
+                            hourArray.push(moment(itm.horaFinal).hours());
                             horarioActual = moment(itm.horaInicio).format('HH') + ' a '+ moment(itm.horaFinal).format('HH');
-                            totalHorasTemp+= moment(itm.horaFinal).diff(moment(itm.horaInicio),'hours');
+                            if(moment(itm.horaFinal).hours() > moment(itm.horaInicio).hours()){
+                                totalHorasTemp+= moment(itm.horaFinal).diff(moment(itm.horaInicio),'hours');
+                            }else{
+                                totalHorasTemp+= (moment(itm.horaFinal).hours()+24) - moment(itm.horaInicio).hours();
+                            }
                             horarioStringTemp+= horarioActual + '\n';
                             tempHorarioObject.push({Id:itm.id,Horario:horarioActual});
                         }
+                        DisbleHoursList.push(hourArray);
                         element.Tiempo.Horarios.push(tempHorarioObject);
                         element.Tiempo.HorarioString.push(horarioStringTemp);
                         element.Tiempo.TotalHoras.push(totalHorasTemp);
@@ -77,7 +86,8 @@ export class ComponentService{
                 MHD: MatrizHorariaData,
                 MHK: MatrizHorariaKey,
                 BHD: BloqueHorarioData,
-                TDV: TableDataView
+                TDV: TableDataView,
+                DHL: DisbleHoursList
             }
         }catch(error){
             this.handleError(error);
@@ -87,11 +97,11 @@ export class ComponentService{
     async updateBloquesHorarios(id: Number): Promise<any>{
         let BloqueHorarioData: any[] = [];
         let TableDataView: TableViewModel[]= [];
+        let DisbleHoursList: Array<Array<Number>> = [];
         try{
             const preDataBloqueHorario = await this.BloqueHorarioService.getBloqueHorario(id).toPromise();
             const groupedData = _.groupBy(preDataBloqueHorario,entity => entity.claseDia.nombre);
             BloqueHorarioData = Object.values(groupedData);
-            TableDataView = [];
             BloqueHorarioData.forEach(element=>{
                 let tempObject: TableViewModel = { 
                     IdBloques:[],
@@ -115,12 +125,16 @@ export class ComponentService{
                         let horarioStringTemp: String = '';
                         let horarioActual: String;
                         let tempHorarioObject:Array<{Horario:String,Id:Number}> = [];
+                        let hourArray: Number[] = [];
                         for(const itm of result){
+                            hourArray.push(moment(itm.horaInicio).hours());
+                            hourArray.push(moment(itm.horaFinal).hours());
                             horarioActual = moment(itm.horaInicio).format('HH') + ' a '+ moment(itm.horaFinal).format('HH');
                             totalHorasTemp+= moment(itm.horaFinal).diff(moment(itm.horaInicio),'hours');
                             horarioStringTemp+= horarioActual + '\n';
                             tempHorarioObject.push({Id:itm.id,Horario:horarioActual});
                         }
+                        DisbleHoursList.push(hourArray);
                         element.Tiempo.Horarios.push(tempHorarioObject);
                         element.Tiempo.HorarioString.push(horarioStringTemp);
                         element.Tiempo.TotalHoras.push(totalHorasTemp);
@@ -134,6 +148,7 @@ export class ComponentService{
             return {
                 BHD: BloqueHorarioData,
                 TDV: TableDataView,
+                DHL: DisbleHoursList
             }
         }catch(error){
             this.handleError(error);
@@ -144,11 +159,12 @@ export class ComponentService{
         let MatrizHorariaData: MatrizHorariaModel[] = [];
         try{
             MatrizHorariaData = await this.BloqueHorarioService.getMatrizHoraria().toPromise();
-            const {BHD,TDV} = await this.updateBloquesHorarios(MatrizHorariaKey);
+            const {BHD,TDV,DHL} = await this.updateBloquesHorarios(MatrizHorariaKey);
             return {
                 MHD: MatrizHorariaData,
                 BHD: BHD,
-                TDV: TDV
+                TDV: TDV,
+                DHL: DHL
             }
         }catch(error){
             this.handleError(error);
@@ -214,8 +230,10 @@ export class ComponentService{
         }
     }
 
-    updateTableData(TableDataView: TableViewModel[],selectedIdBloqueHorario: Number,selectedDataTableViewIndex :Number,selectedHorariosViewIndex: Number,selectedTotalHorasIndex: Number,InitialHour: String,FinalHour: String,IdHorario: Number): TableViewModel[]{
+    updateTableData(TableDataView: TableViewModel[],selectedIdBloqueHorario: Number,selectedDataTableViewIndex :Number,selectedHorariosViewIndex: Number,selectedTotalHorasIndex: Number,InitialHour: String,FinalHour: String,IdHorario: Number,DisableHourList: Number[]): any{
 
+        DisableHourList.push(moment(InitialHour.toString()).hours());
+        DisableHourList.push(moment(FinalHour.toString()).hours());
         const horarioString = moment(InitialHour.toString()).format('HH')+ ' a ' + moment(FinalHour.toString()).format('HH');
         TableDataView[selectedDataTableViewIndex.valueOf()].IdBloques.push(selectedIdBloqueHorario.valueOf());
         TableDataView[selectedDataTableViewIndex.valueOf()]
@@ -223,16 +241,23 @@ export class ComponentService{
         .HorarioString[selectedHorariosViewIndex.valueOf()]+=horarioString+'\n';
         
         const valueTotalHoras = TableDataView[selectedDataTableViewIndex.valueOf()].Tiempo.TotalHoras[selectedTotalHorasIndex.valueOf()].valueOf();
+        let actualValue: number = 0;
+        
+        if(moment(FinalHour.toString()).hours() >  moment(InitialHour.toString()).hours()){
+            actualValue = moment(FinalHour.toString()).diff(moment(InitialHour.toString()),'hours');
+        }else{
+            actualValue = (moment(FinalHour.toString()).hours() + 24) - moment(InitialHour.toString()).hours();
+        }
 
         TableDataView[selectedDataTableViewIndex.valueOf()]
         .Tiempo
-        .TotalHoras[selectedTotalHorasIndex.valueOf()] = valueTotalHoras + moment(FinalHour.toString()).diff(moment(InitialHour.toString()),'hours');
+        .TotalHoras[selectedTotalHorasIndex.valueOf()] = valueTotalHoras + actualValue
 
         TableDataView[selectedDataTableViewIndex.valueOf()]
         .Tiempo
         .Horarios[selectedHorariosViewIndex.valueOf()].push({Id:IdHorario,Horario:horarioString});
 
-        return TableDataView;
+        return {TDV: TableDataView, DHL: DisableHourList};
     }
 
     
@@ -244,7 +269,8 @@ export class ComponentService{
         }
     }
     
-    async deleteHorarios(data: TableViewModel,selectedHorarios: Number[]): Promise<TableViewModel>{
+    async deleteHorarios(data: TableViewModel,selectedHorarios: Number[]): Promise<any>{
+        let DisbleHoursList: Array<Number> = [];
         for(const id of selectedHorarios){
             await this.BloqueHorarioService.deleteHorario(id,{estado:false}).toPromise()
         }
@@ -265,11 +291,14 @@ export class ComponentService{
                 let horarioActual: String;
                 let tempHorarioObject:Array<{Horario:String,Id:Number}> = [];
                 for(const itm of result){
+                    DisbleHoursList.push(moment(itm.horaInicio).hours());
+                    DisbleHoursList.push(moment(itm.horaFinal).hours());
                     horarioActual = moment(itm.horaInicio).format('HH') + ' a '+ moment(itm.horaFinal).format('HH');
                     totalHorasTemp+= moment(itm.horaFinal).diff(moment(itm.horaInicio),'hours');
                     horarioStringTemp+= horarioActual + '\n';
                     tempHorarioObject.push({Id:itm.id,Horario:horarioActual});
                 }
+
                 returnObject.Tiempo.Horarios.push(tempHorarioObject);
                 returnObject.Tiempo.HorarioString.push(horarioStringTemp);
                 returnObject.Tiempo.TotalHoras.push(totalHorasTemp);
@@ -278,7 +307,7 @@ export class ComponentService{
             }
         }
 
-        return returnObject;
+        return {TDV: returnObject, DHL: DisbleHoursList};
     }
 
     async deleteMatrizHoraria(id: Number): Promise<void>{
@@ -290,8 +319,24 @@ export class ComponentService{
     }
 
     // Utitlity Functions -------------------------------
+    handleHoursOverflow(object: TableViewModel,InitialHour: Number, FinalHour: Number): Boolean{
+        const totalHorasActual = _.sum(object.Tiempo.TotalHoras);
+        const totalHorasLocal = (FinalHour > InitialHour)? 
+            (FinalHour.valueOf() - InitialHour.valueOf()):
+            ((FinalHour.valueOf()+24) - InitialHour.valueOf())
+        if((totalHorasActual+totalHorasLocal)>24){
+            return true;
+        }else{
+            return false;
+        }
+    }
+
     handleMessage(message: String):void{
         this.AlertService.success(message.toString());
+    }
+
+    handleMessageError(message: String):void{
+        this.AlertService.error(message.toString());
     }
 
     handleError(error:any){
