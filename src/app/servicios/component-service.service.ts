@@ -234,6 +234,32 @@ export class ComponentService{
         }
     }
 
+    async updateTotalHoras(id: Number): Promise<Number>{
+        try{
+            const result: HorarioModel[] = await this.BloqueHorarioService.getHorario(id).toPromise();
+            let totalHorasTemp: number = 0;
+            for(const itm of result){
+                if(moment(itm.horaFinal).hours() > moment(itm.horaInicio).hours()){
+                    totalHorasTemp+= moment(itm.horaFinal).diff(moment(itm.horaInicio),'hours');
+                }else{
+                    totalHorasTemp+= (moment(itm.horaFinal).hours()+24) - moment(itm.horaInicio).hours();
+                }
+            }
+            
+            return totalHorasTemp;
+        }catch(error){
+            this.handleError(error);
+        }
+    }
+
+    async putHorario(object: HorarioTransferObject,id: Number): Promise<void>{
+        try{
+            console.log(await this.BloqueHorarioService.putHorario(id,object).toPromise());
+        }catch(error){
+            this.handleError(error);
+        }
+    }
+
     updateTableData(TableDataView: TableViewModel[],selectedIdBloqueHorario: Number,selectedDataTableViewIndex :Number,selectedHorariosViewIndex: Number,selectedTotalHorasIndex: Number,InitialHour: String,FinalHour: String,IdHorario: Number,DisableHourList: Number[]): any{
 
         DisableHourList.push(moment(InitialHour.toString()).hours());
@@ -361,7 +387,23 @@ export class ComponentService{
         }
         return returnString;
     }
+
+    searchStringfromId(object: Array<{Horario: String,Id: Number}>,id: Number): {index: Number, Horario: String}{
+        const horario = _.find(object,(itm)=> itm.Id === id ).Horario;
+        const index = _.findIndex(object,(itm)=> itm.Id === id);
+        return {index: index,Horario:horario}
+    }
+
+    parseHorarioString(delimiter: String,input: String): Array<Number>{
+        const parseString = _.split(input,delimiter);
+        const convertedArray = _.map(parseString,(itm)=> Number(itm));
+        return convertedArray;
+    }
     
+    returnIndexDisableHours(object: Array<Number>,id: Number){
+        return _.findIndex(object,(itm)=> itm === id)
+    }
+
     returnIndexMatrizHorariaData(object: MatrizHorariaModel[],id: Number): number {
         return _.findIndex(object, (itm)=> itm.id === id);
     }

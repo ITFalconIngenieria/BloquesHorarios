@@ -9,6 +9,7 @@ import { MatrizHorariaTransferObject } from '@data-transfer/matriz-horaria-trans
 import { TableViewModel } from '@model/table-view-model';
 import { ComponentService } from '@service/component-service.service';
 import { HorarioTransferObject } from '@data-transfer/horario-transfer-object';
+import { Validators } from '@angular/forms';
 
 moment.locale('es');
 
@@ -81,7 +82,9 @@ export class AppComponent implements OnInit{
     Observacion: new FormControl(''),
   });
   matrizHorariaForm = new FormGroup({
-    Codigo: new FormControl(''),
+    Codigo: new FormControl('',[
+      Validators.required,
+      Validators.minLength(1)]),
     Descripcion: new FormControl(''),
     Observacion: new FormControl('')
   });
@@ -166,31 +169,55 @@ export class AppComponent implements OnInit{
 
 
   //HandleFunctions-----------------------------------------------------------------------------------------------------
-  handleOkModifyHorario(){
+  async handleOkModifyHorario(){
     if(this.ComponentService.handleHoursOverflow(this.TableDataView[this.selectedDataTableViewIndex.valueOf()],this.InitialTime,this.FinalTime)){
       this.ComponentService.handleMessageError("La cantidad excede las 24 horas por bloque, intente ingresar otro valor");
     }else{
       
-      const ActualDate= new Date();
-      const InitialHour = new Date(
-        ActualDate.getFullYear(),
-        ActualDate.getMonth(),
-        ActualDate.getDay(),
-        this.InitialTime.valueOf(),
-        0,
-        0,
-        0
-      ).toISOString();
-      const FinalHour = new Date(
-        ActualDate.getFullYear(),
-        ActualDate.getMonth(),
-        ActualDate.getDay(),
-        this.FinalTime.valueOf(),
-        0,
-        0,
-        0
-      ).toISOString();
+    let InitialHour = new Date();
+    let FinalHour = new Date();
+    InitialHour.setHours(this.InitialTime.valueOf());
+    InitialHour.setMinutes(0);
+    InitialHour.setSeconds(0);
+    InitialHour.setMilliseconds(0);
+    FinalHour.setHours(this.FinalTime.valueOf());
+    FinalHour.setMinutes(0);
+    FinalHour.setSeconds(0);
+    FinalHour.setMilliseconds(0);
+    const _InitialHour = moment(InitialHour).toISOString(true);
+    const _FinalHour = moment(FinalHour).toISOString(true);
+    const hourFormat = moment(_InitialHour).format('HH')+ ' a ' + moment(_FinalHour).format('HH');
+
+    const stringReturn = this.ComponentService.searchStringfromId(this.TableDataView[this.selectedDataTableViewIndex.valueOf()].Tiempo.Horarios[this.selectedHorariosViewIndex.valueOf()],this.selectedHorarioModifyId);
+    const parseStringArray = this.ComponentService.parseHorarioString(' a ',stringReturn.Horario);
+    const index1 = this.ComponentService.returnIndexDisableHours(this.DisbleHoursList[this.selectedDataTableViewIndex.valueOf()],parseStringArray[0]);
+    const index2 = this.ComponentService.returnIndexDisableHours(this.DisbleHoursList[this.selectedDataTableViewIndex.valueOf()],parseStringArray[1]);
+
+    this.DisbleHoursList[this.selectedDataTableViewIndex.valueOf()][index1] = this.InitialTime;
+    this.DisbleHoursList[this.selectedDataTableViewIndex.valueOf()][index2]= this.FinalTime;
+    this.TableDataView[this.selectedDataTableViewIndex.valueOf()].Tiempo.Horarios[this.selectedHorariosViewIndex.valueOf()][stringReturn.index.valueOf()].Horario = hourFormat;
+    
+    const newHorarioString = this.TableDataView[this.selectedDataTableViewIndex.valueOf()].Tiempo.HorarioString[this.selectedHorariosViewIndex.valueOf()].replace(stringReturn.Horario.toString(),hourFormat.toString());
+    this.TableDataView[this.selectedDataTableViewIndex.valueOf()].Tiempo.HorarioString[this.selectedHorariosViewIndex.valueOf()] = newHorarioString;
+    const transferObject: HorarioTransferObject = {
+      bloqueHorarioId: this.selectedIdBloqueHorario,
+      horaInicio: _InitialHour, 
+      horaFinal: _FinalHour,
+      estado: true
     }
+
+    await this.ComponentService.putHorario(transferObject,this.selectedHorarioModifyId);
+    const newTotalHoras = await this.ComponentService.updateTotalHoras(this.selectedIdBloqueHorario);
+    this.TableDataView[this.selectedDataTableViewIndex.valueOf()]
+        .Tiempo
+        .TotalHoras[this.selectedTotalHorasIndex.valueOf()] = newTotalHoras;
+    
+
+    }
+    this.SelectModifyHorarioView=[];
+    this.selectedHorarioModifyId = null;
+    this.InitialTime = null;
+    this.FinalTime = null;
     this.visibleModifyHorarioModal = false;
   }
 
@@ -268,12 +295,13 @@ export class AppComponent implements OnInit{
 
   async handleOkMatrizHorariaForm(): Promise<void>{
     this.loadingPostMatrizHoraria = true;
+    let _date = moment(new Date()).toISOString(true);
     let bodyObject: MatrizHorariaTransferObject = {
       codigo: this.matrizHorariaForm.get('Codigo').value,
       descripcion: this.matrizHorariaForm.get('Descripcion').value,
       observacion: this.matrizHorariaForm.get('Observacion').value,
       estado: true,
-      fechaCreacion: new Date().toISOString()
+      fechaCreacion: _date
     }; 
     try{
       this.MatrizHorariaData = await this.ComponentService.postMatrizHoraria(bodyObject);
@@ -291,30 +319,24 @@ export class AppComponent implements OnInit{
     this.ComponentService.handleMessageError("La cantidad excede las 24 horas por bloque, intente ingresar otro valor");
   }else{
     
-    const ActualDate= new Date();
-    const InitialHour = new Date(
-      ActualDate.getFullYear(),
-      ActualDate.getMonth(),
-      ActualDate.getDay(),
-      this.InitialTime.valueOf(),
-      0,
-      0,
-      0
-    ).toISOString();
-    const FinalHour = new Date(
-      ActualDate.getFullYear(),
-      ActualDate.getMonth(),
-      ActualDate.getDay(),
-      this.FinalTime.valueOf(),
-      0,
-      0,
-      0
-    ).toISOString();
+  
+    let InitialHour = new Date();
+    let FinalHour = new Date();
+    InitialHour.setHours(this.InitialTime.valueOf());
+    InitialHour.setMinutes(0);
+    InitialHour.setSeconds(0);
+    InitialHour.setMilliseconds(0);
+    FinalHour.setHours(this.FinalTime.valueOf());
+    FinalHour.setMinutes(0);
+    FinalHour.setSeconds(0);
+    FinalHour.setMilliseconds(0);
+    const _InitialHour = moment(InitialHour).toISOString(true);
+    const _FinalHour = moment(FinalHour).toISOString(true); 
   
     const transferObject: HorarioTransferObject = {
       bloqueHorarioId: this.selectedIdBloqueHorario,
-      horaInicio: InitialHour, 
-      horaFinal: FinalHour,
+      horaInicio: _InitialHour, 
+      horaFinal: _FinalHour,
       estado: true
     }
     const IdHorario = await this.ComponentService.postHorario(transferObject);
@@ -325,8 +347,8 @@ export class AppComponent implements OnInit{
       this.selectedDataTableViewIndex,
       this.selectedHorariosViewIndex,
       this.selectedTotalHorasIndex,
-      InitialHour,
-      FinalHour,
+      _InitialHour,
+      _FinalHour,
       IdHorario,
       this.DisbleHoursList[this.selectedDataTableViewIndex.valueOf()]
     );
