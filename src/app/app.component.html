@@ -307,7 +307,7 @@
 
     <ng-template #modalModifyFooter>
       <button nz-button nzType="danger"  (click)="handleCancelModifyHorario()"  style="margin-right: 8px;"><span>Cancel</span></button>
-      <button nz-button nzType="primary" *ngIf="InitialTime && FinalTime && selectedHorarioModifyId" (click)="handleOkModifyHorario()" style="background-color:seagreen;border-color: seagreen;" [nzLoading]="loadingDeleteHorario"><span>Submit</span></button>
+      <button nz-button nzType="primary" *ngIf="InitialTime !== null && FinalTime !== null && selectedHorarioModifyId !== null" (click)="handleOkModifyHorario()" style="background-color:seagreen;border-color: seagreen;" [nzLoading]="loadingDeleteHorario"><span>Submit</span></button>
     </ng-template>
   </nz-modal>
 </div>

@@ -1,7 +1,7 @@
 export interface HorarioModel{
     id: Number,
-    horaInicio: Date,
-    horaFinal: Date,
+    horaInicio: String,
+    horaFinal: String,
     estado:Boolean,
     bloqueHorarioId: Number,
 };

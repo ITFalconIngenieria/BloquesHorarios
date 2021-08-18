@@ -3,6 +3,7 @@ import * as moment from 'moment-timezone';
 import * as _ from 'lodash';
 import { NzModalService } from 'ng-zorro-antd/modal';
 import { FormControl, FormGroup } from '@angular/forms';
+import { DatePipe } from '@angular/common';
 
 import { MatrizHorariaModel } from '@model/matriz-horaria-model';
 import { MatrizHorariaTransferObject } from '@data-transfer/matriz-horaria-transfer-object';
@@ -28,6 +29,7 @@ export class AppComponent implements OnInit{
   InitialTime: Number = null;
   FinalTime: Number = null;
   Timeout: any = null;
+  pipe = new DatePipe('en-US');
   //--------------------------
 
   //Component Arrays----------------------------------------------------------------------------------------------------
@@ -184,35 +186,22 @@ export class AppComponent implements OnInit{
     FinalHour.setMinutes(0);
     FinalHour.setSeconds(0);
     FinalHour.setMilliseconds(0);
-    const _InitialHour = moment(InitialHour).toISOString(true);
-    const _FinalHour = moment(FinalHour).toISOString(true);
-    const hourFormat = moment(_InitialHour).format('HH')+ ' a ' + moment(_FinalHour).format('HH');
-
-    const stringReturn = this.ComponentService.searchStringfromId(this.TableDataView[this.selectedDataTableViewIndex.valueOf()].Tiempo.Horarios[this.selectedHorariosViewIndex.valueOf()],this.selectedHorarioModifyId);
-    const parseStringArray = this.ComponentService.parseHorarioString(' a ',stringReturn.Horario);
-    const index1 = this.ComponentService.returnIndexDisableHours(this.DisbleHoursList[this.selectedDataTableViewIndex.valueOf()],parseStringArray[0]);
-    const index2 = this.ComponentService.returnIndexDisableHours(this.DisbleHoursList[this.selectedDataTableViewIndex.valueOf()],parseStringArray[1]);
-
-    this.DisbleHoursList[this.selectedDataTableViewIndex.valueOf()][index1] = this.InitialTime;
-    this.DisbleHoursList[this.selectedDataTableViewIndex.valueOf()][index2]= this.FinalTime;
-    this.TableDataView[this.selectedDataTableViewIndex.valueOf()].Tiempo.Horarios[this.selectedHorariosViewIndex.valueOf()][stringReturn.index.valueOf()].Horario = hourFormat;
+    const preDateFormatFinalHour = this.pipe.transform(FinalHour,'yyyy-MM-ddTHH:mm','-1200');
+    const preDateFormatInitialHour = this.pipe.transform(InitialHour,'yyyy-MM-ddTHH:mm','-1200');
+    const _InitialHour = moment(preDateFormatInitialHour).toISOString(true);
+    const _FinalHour = moment(preDateFormatFinalHour).toISOString(true);
     
-    const newHorarioString = this.TableDataView[this.selectedDataTableViewIndex.valueOf()].Tiempo.HorarioString[this.selectedHorariosViewIndex.valueOf()].replace(stringReturn.Horario.toString(),hourFormat.toString());
-    this.TableDataView[this.selectedDataTableViewIndex.valueOf()].Tiempo.HorarioString[this.selectedHorariosViewIndex.valueOf()] = newHorarioString;
     const transferObject: HorarioTransferObject = {
       bloqueHorarioId: this.selectedIdBloqueHorario,
       horaInicio: _InitialHour, 
       horaFinal: _FinalHour,
       estado: true
     }
-
     await this.ComponentService.putHorario(transferObject,this.selectedHorarioModifyId);
-    const newTotalHoras = await this.ComponentService.updateTotalHoras(this.selectedIdBloqueHorario);
-    this.TableDataView[this.selectedDataTableViewIndex.valueOf()]
-        .Tiempo
-        .TotalHoras[this.selectedTotalHorasIndex.valueOf()] = newTotalHoras;
+    const {TDV,DHL} = await this.ComponentService.horariosRefresh(this.TableDataView[this.selectedDataTableViewIndex.valueOf()]);
+    this.TableDataView[this.selectedDataTableViewIndex.valueOf()] = TDV;
+    this.DisbleHoursList[this.selectedDataTableViewIndex.valueOf()] = DHL;
     
-
     }
     this.SelectModifyHorarioView=[];
     this.selectedHorarioModifyId = null;
@@ -295,13 +284,15 @@ export class AppComponent implements OnInit{
 
   async handleOkMatrizHorariaForm(): Promise<void>{
     this.loadingPostMatrizHoraria = true;
-    let _date = moment(new Date()).toISOString(true);
+    let date = this.pipe.transform(new Date(),'yyyy-MM-ddTHH:mm','-1200');
+    let dateFormated = moment(date).toISOString(true);
+
     let bodyObject: MatrizHorariaTransferObject = {
       codigo: this.matrizHorariaForm.get('Codigo').value,
       descripcion: this.matrizHorariaForm.get('Descripcion').value,
       observacion: this.matrizHorariaForm.get('Observacion').value,
       estado: true,
-      fechaCreacion: _date
+      fechaCreacion: dateFormated
     }; 
     try{
       this.MatrizHorariaData = await this.ComponentService.postMatrizHoraria(bodyObject);
@@ -330,8 +321,11 @@ export class AppComponent implements OnInit{
     FinalHour.setMinutes(0);
     FinalHour.setSeconds(0);
     FinalHour.setMilliseconds(0);
-    const _InitialHour = moment(InitialHour).toISOString(true);
-    const _FinalHour = moment(FinalHour).toISOString(true); 
+    
+    const preDateFormatFinalHour = this.pipe.transform(FinalHour,'yyyy-MM-ddTHH:mm','-1200');
+    const preDateFormatInitialHour = this.pipe.transform(InitialHour,'yyyy-MM-ddTHH:mm','-1200');
+    const _InitialHour = moment(preDateFormatInitialHour).toISOString(true);
+    const _FinalHour = moment(preDateFormatFinalHour).toISOString(true); 
   
     const transferObject: HorarioTransferObject = {
       bloqueHorarioId: this.selectedIdBloqueHorario,
@@ -339,21 +333,10 @@ export class AppComponent implements OnInit{
       horaFinal: _FinalHour,
       estado: true
     }
-    const IdHorario = await this.ComponentService.postHorario(transferObject);
-    
-    const {TDV,DHL} = this.ComponentService.updateTableData(
-      this.TableDataView,
-      this.selectedIdBloqueHorario,
-      this.selectedDataTableViewIndex,
-      this.selectedHorariosViewIndex,
-      this.selectedTotalHorasIndex,
-      _InitialHour,
-      _FinalHour,
-      IdHorario,
-      this.DisbleHoursList[this.selectedDataTableViewIndex.valueOf()]
-    );
-    
-    this.TableDataView = TDV;
+    await this.ComponentService.postHorario(transferObject);
+    const {TDV,DHL} = await this.ComponentService.horariosRefresh(this.TableDataView[this.selectedDataTableViewIndex.valueOf()]);
+  
+    this.TableDataView[this.selectedDataTableViewIndex.valueOf()] = TDV;
     this.DisbleHoursList[this.selectedDataTableViewIndex.valueOf()] = DHL;
   }
   this.loadingPostingHorario = false;

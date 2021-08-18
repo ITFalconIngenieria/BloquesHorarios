@@ -132,6 +132,10 @@ export class BloqueHorarioService {
     return this.http.get<HorarioModel[]>(`${apiUrl}horarios?filter={"where":{"and":[{"bloqueHorarioId":"${id}"},{"estado":"true"}]}}`);
   }
 
+  getHorarioById(id){
+    return this.http.get<HorarioModel[]>(`${apiUrl}horarios?filter={"where":{"and":[{"id":"${id}"},{"estado":"true"}]}}`);
+  }
+
   postHorario(horario: HorarioTransferObject) { 
     return this.http.post<any>(`${apiUrl}horarios`, horario);
   }

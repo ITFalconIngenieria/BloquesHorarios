@@ -61,13 +61,17 @@ export class ComponentService{
                         let horarioActual: String;
                         let tempHorarioObject:Array<{Horario:String,Id:Number}> =[];
                         for(const itm of result){
-                            hourArray.push(moment(itm.horaInicio).hours());
-                            hourArray.push(moment(itm.horaFinal).hours());
-                            horarioActual = moment(itm.horaInicio).format('HH') + ' a '+ moment(itm.horaFinal).format('HH');
-                            if(moment(itm.horaFinal).hours() > moment(itm.horaInicio).hours()){
-                                totalHorasTemp+= moment(itm.horaFinal).diff(moment(itm.horaInicio),'hours');
+                            horarioActual = moment(itm.horaInicio.toString()).utcOffset(0).format('HH') + ' a '+ moment(itm.horaFinal.toString()).utcOffset(0).format('HH');
+                            if(moment(itm.horaFinal.toString()).utcOffset(0).hours() > moment(itm.horaInicio.toString()).utcOffset(0).hours()){
+                                for(let i= moment(itm.horaInicio.toString()).utcOffset(0).hours() ; i != moment(itm.horaFinal.toString()).utcOffset(0).hours()+1 ; i++){
+                                    hourArray.push(i);
+                                }
+                                totalHorasTemp+= moment(itm.horaFinal.toString()).utcOffset(0).diff(moment(itm.horaInicio.toString()).utcOffset(0),'hours');
                             }else{
-                                totalHorasTemp+= (moment(itm.horaFinal).hours()+24) - moment(itm.horaInicio).hours();
+                                for(let i = moment(itm.horaInicio.toString()).utcOffset(0).hours(); (i % 24) != moment(itm.horaFinal.toString()).utcOffset(0).hours()+1; i++ ){
+                                    hourArray.push(i%24);
+                                }
+                                totalHorasTemp+= (moment(itm.horaFinal.toString()).utcOffset(0).hours()+24) - moment(itm.horaInicio.toString()).utcOffset(0).hours();
                             }
                             horarioStringTemp+= horarioActual + '\n';
                             tempHorarioObject.push({Id:itm.id,Horario:horarioActual});
@@ -79,7 +83,7 @@ export class ComponentService{
                         this.handleError(error);
                     }
                 }
-                DisbleHoursList.push(hourArray);
+                DisbleHoursList.push(_.uniq(hourArray));
             }
             //Retorna Los Valores reales ya que no son argumentos por referencia y se pierde la data al terminar la funcion
             return {
@@ -127,13 +131,17 @@ export class ComponentService{
                         let horarioActual: String;
                         let tempHorarioObject:Array<{Horario:String,Id:Number}> = [];
                         for(const itm of result){
-                            hourArray.push(moment(itm.horaInicio).hours());
-                            hourArray.push(moment(itm.horaFinal).hours());
-                            horarioActual = moment(itm.horaInicio).format('HH') + ' a '+ moment(itm.horaFinal).format('HH');
-                            if(moment(itm.horaFinal).hours() > moment(itm.horaInicio).hours()){
-                                totalHorasTemp+= moment(itm.horaFinal).diff(moment(itm.horaInicio),'hours');
+                            horarioActual = moment(itm.horaInicio.toString()).utcOffset(0).format('HH') + ' a '+ moment(itm.horaFinal.toString()).utcOffset(0).format('HH');
+                            if(moment(itm.horaFinal.toString()).utcOffset(0).hours() > moment(itm.horaInicio.toString()).utcOffset(0).hours()){
+                                for(let i= moment(itm.horaInicio.toString()).utcOffset(0).hours() ; i != moment(itm.horaFinal.toString()).utcOffset(0).hours()+1 ; i++){
+                                    hourArray.push(i);
+                                }
+                                totalHorasTemp+= moment(itm.horaFinal.toString()).utcOffset(0).diff(moment(itm.horaInicio.toString()).utcOffset(0),'hours');
                             }else{
-                                totalHorasTemp+= (moment(itm.horaFinal).hours()+24) - moment(itm.horaInicio).hours();
+                                for(let i = moment(itm.horaInicio.toString()).utcOffset(0).hours(); (i % 24) != moment(itm.horaFinal.toString()).utcOffset(0).hours()+1; i++ ){
+                                    hourArray.push(i%24);
+                                }
+                                totalHorasTemp+= (moment(itm.horaFinal.toString()).utcOffset(0).hours()+24) - moment(itm.horaInicio.toString()).utcOffset(0).hours();
                             }
                             horarioStringTemp+= horarioActual + '\n';
                             tempHorarioObject.push({Id:itm.id,Horario:horarioActual});
@@ -146,7 +154,7 @@ export class ComponentService{
                     }
                     
                 }
-                DisbleHoursList.push(hourArray);
+                DisbleHoursList.push(_.uniq(hourArray));
             }
 
             return {
@@ -226,27 +234,10 @@ export class ComponentService{
         }
     }
 
-    async postHorario(object: HorarioTransferObject): Promise<Number>{
+    async postHorario(object: HorarioTransferObject): Promise<void>{
         try{
-            return await(await this.BloqueHorarioService.postHorario(object).toPromise()).id;
-        }catch(error){
-            this.handleError(error);
-        }
-    }
-
-    async updateTotalHoras(id: Number): Promise<Number>{
-        try{
-            const result: HorarioModel[] = await this.BloqueHorarioService.getHorario(id).toPromise();
-            let totalHorasTemp: number = 0;
-            for(const itm of result){
-                if(moment(itm.horaFinal).hours() > moment(itm.horaInicio).hours()){
-                    totalHorasTemp+= moment(itm.horaFinal).diff(moment(itm.horaInicio),'hours');
-                }else{
-                    totalHorasTemp+= (moment(itm.horaFinal).hours()+24) - moment(itm.horaInicio).hours();
-                }
-            }
-            
-            return totalHorasTemp;
+            /* return await(await this.BloqueHorarioService.postHorario(object).toPromise()).id */;
+            await this.BloqueHorarioService.postHorario(object).toPromise()
         }catch(error){
             this.handleError(error);
         }
@@ -254,42 +245,11 @@ export class ComponentService{
 
     async putHorario(object: HorarioTransferObject,id: Number): Promise<void>{
         try{
-            console.log(await this.BloqueHorarioService.putHorario(id,object).toPromise());
+            await this.BloqueHorarioService.putHorario(id,object).toPromise();
         }catch(error){
             this.handleError(error);
         }
     }
-
-    updateTableData(TableDataView: TableViewModel[],selectedIdBloqueHorario: Number,selectedDataTableViewIndex :Number,selectedHorariosViewIndex: Number,selectedTotalHorasIndex: Number,InitialHour: String,FinalHour: String,IdHorario: Number,DisableHourList: Number[]): any{
-
-        DisableHourList.push(moment(InitialHour.toString()).hours());
-        DisableHourList.push(moment(FinalHour.toString()).hours());
-        const horarioString = moment(InitialHour.toString()).format('HH')+ ' a ' + moment(FinalHour.toString()).format('HH');
-        TableDataView[selectedDataTableViewIndex.valueOf()].IdBloques.push(selectedIdBloqueHorario.valueOf());
-        TableDataView[selectedDataTableViewIndex.valueOf()]
-        .Tiempo
-        .HorarioString[selectedHorariosViewIndex.valueOf()]+=horarioString+'\n';
-        
-        const valueTotalHoras = TableDataView[selectedDataTableViewIndex.valueOf()].Tiempo.TotalHoras[selectedTotalHorasIndex.valueOf()].valueOf();
-        let actualValue: number = 0;
-        
-        if(moment(FinalHour.toString()).hours() >  moment(InitialHour.toString()).hours()){
-            actualValue = moment(FinalHour.toString()).diff(moment(InitialHour.toString()),'hours');
-        }else{
-            actualValue = (moment(FinalHour.toString()).hours() + 24) - moment(InitialHour.toString()).hours();
-        }
-
-        TableDataView[selectedDataTableViewIndex.valueOf()]
-        .Tiempo
-        .TotalHoras[selectedTotalHorasIndex.valueOf()] = valueTotalHoras + actualValue
-
-        TableDataView[selectedDataTableViewIndex.valueOf()]
-        .Tiempo
-        .Horarios[selectedHorariosViewIndex.valueOf()].push({Id:IdHorario,Horario:horarioString});
-
-        return {TDV: TableDataView, DHL: DisableHourList};
-    }
-
     
     async updateMatrizHorariaDescripcion(id: Number,object: MatrizHorariaTransferObject): Promise<void>{
         try{
@@ -299,11 +259,8 @@ export class ComponentService{
         }
     }
     
-    async deleteHorarios(data: TableViewModel,selectedHorarios: Number[]): Promise<any>{
+    async horariosRefresh(data: TableViewModel): Promise<any>{
         let DisbleHoursList: Number[] = [];
-        for(const id of selectedHorarios){
-            await this.BloqueHorarioService.deleteHorario(id,{estado:false}).toPromise()
-        }
         let returnObject: TableViewModel={
             IdBloques: data.IdBloques,
             ClaseDia: data.ClaseDia,
@@ -321,10 +278,18 @@ export class ComponentService{
                 let horarioActual: String;
                 let tempHorarioObject:Array<{Horario:String,Id:Number}> = [];
                 for(const itm of result){
-                    DisbleHoursList.push(moment(itm.horaInicio).hours());
-                    DisbleHoursList.push(moment(itm.horaFinal).hours());
-                    horarioActual = moment(itm.horaInicio).format('HH') + ' a '+ moment(itm.horaFinal).format('HH');
-                    totalHorasTemp+= moment(itm.horaFinal).diff(moment(itm.horaInicio),'hours');
+                    if(moment(itm.horaFinal.toString()).utcOffset(0).hours() >  moment(itm.horaInicio.toString()).utcOffset(0).hours()){
+                        for(let i= moment(itm.horaInicio.toString()).utcOffset(0).hours() ; i != moment(itm.horaFinal.toString()).utcOffset(0).hours()+1 ; i++){
+                            DisbleHoursList.push(i);
+                        }
+                        totalHorasTemp+= moment(itm.horaFinal.toString()).utcOffset(0).diff(moment(itm.horaInicio.toString()).utcOffset(0),'hours');
+                    }else{
+                        for(let i = moment(itm.horaInicio.toString()).utcOffset(0).hours(); (i % 24) != moment(itm.horaFinal.toString()).utcOffset(0).hours()+1; i++ ){
+                            DisbleHoursList.push(i%24);
+                        }
+                        totalHorasTemp+= (moment(itm.horaFinal.toString()).utcOffset(0).hours()+24) - moment(itm.horaInicio.toString()).utcOffset(0).hours();
+                    }
+                    horarioActual = moment(itm.horaInicio.toString()).utcOffset(0).format('HH') + ' a '+ moment(itm.horaFinal.toString()).utcOffset(0).format('HH');
                     horarioStringTemp+= horarioActual + '\n';
                     tempHorarioObject.push({Id:itm.id,Horario:horarioActual});
                 }
@@ -337,7 +302,16 @@ export class ComponentService{
             }
         }
 
-        return {TDV: returnObject, DHL: DisbleHoursList};
+        return {TDV: returnObject, DHL: _.uniq(DisbleHoursList)};
+    }
+
+
+    async deleteHorarios(data: TableViewModel,selectedHorarios: Number[]): Promise<any>{
+        for(const id of selectedHorarios){
+            await this.BloqueHorarioService.deleteHorario(id,{estado:false}).toPromise()
+        }
+        const {TDV,DHL} = await this.horariosRefresh(data);
+        return {TDV: TDV, DHL: _.uniq(DHL)};
     }
 
     async deleteMatrizHoraria(id: Number): Promise<void>{
@@ -372,36 +346,6 @@ export class ComponentService{
     handleError(error:any){
         console.error(error);
         this.AlertService.error(`Ha ocurrido un error Inesperado, Codigo:${error.status}`)
-    }
-
-    parseString(delimiter: String, input: String): Array<string>{
-        const parseString = _.split(input,delimiter);
-        const cleanArray = _.compact(parseString);
-        return cleanArray;
-    }
-
-    arrayToString(array: Array<String>): string{
-        let returnString: string = ''
-        for(const element of array){
-            returnString+=element+'\n';
-        }
-        return returnString;
-    }
-
-    searchStringfromId(object: Array<{Horario: String,Id: Number}>,id: Number): {index: Number, Horario: String}{
-        const horario = _.find(object,(itm)=> itm.Id === id ).Horario;
-        const index = _.findIndex(object,(itm)=> itm.Id === id);
-        return {index: index,Horario:horario}
-    }
-
-    parseHorarioString(delimiter: String,input: String): Array<Number>{
-        const parseString = _.split(input,delimiter);
-        const convertedArray = _.map(parseString,(itm)=> Number(itm));
-        return convertedArray;
-    }
-    
-    returnIndexDisableHours(object: Array<Number>,id: Number){
-        return _.findIndex(object,(itm)=> itm === id)
     }
 
     returnIndexMatrizHorariaData(object: MatrizHorariaModel[],id: Number): number {
